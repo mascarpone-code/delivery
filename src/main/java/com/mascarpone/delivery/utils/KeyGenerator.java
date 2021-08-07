@@ -1,6 +1,7 @@
 package com.mascarpone.delivery.utils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class KeyGenerator {
@@ -117,7 +118,8 @@ public class KeyGenerator {
         var random = new Random(System.nanoTime());
 
         // Collect the categories to use.
-        var charCategories = new ArrayList<String>(4);
+        List<String> charCategories = new ArrayList<>(4);
+
         if (useLower) {
             charCategories.add(LOWER);
         }

@@ -24,7 +24,7 @@ public class ReadExcel {
 
     public void createOrUpdateNomenclatureAfterReadExcelFile(String path, int numberColumnName, int numberColumnQuantity, int numberColumnUnit, int countHeaderString) {
         try {
-            var listAfterReadFromExcel = new ArrayList<>(createOrUpdateNomenclatureAfterReadExcelFile(path).values());
+            List<List<String>> listAfterReadFromExcel = new ArrayList<>(createOrUpdateNomenclatureAfterReadExcelFile(path).values());
 
             if (countHeaderString > 0) {
                 listAfterReadFromExcel.subList(0, countHeaderString).clear();

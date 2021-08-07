@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.mascarpone.delivery.utils.Constants.CUSTOMER_PUSH_TOKEN_MAX_COUNT;
+
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PushTokenServiceImpl implements PushTokenService {
@@ -78,7 +80,7 @@ public class PushTokenServiceImpl implements PushTokenService {
 
         var pushTokenList = pushTokenRepository.findAllByUserId(customerId);
 
-        if (pushTokenList.size() > 3) {
+        if (pushTokenList.size() > CUSTOMER_PUSH_TOKEN_MAX_COUNT) {
             pushTokenRepository.deleteAll(pushTokenList);
         }
 

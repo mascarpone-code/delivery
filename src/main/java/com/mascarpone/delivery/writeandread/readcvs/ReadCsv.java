@@ -83,7 +83,7 @@ public class ReadCsv {//separator
                 .withCSVParser(parser)
                 .build();
 
-        var listOfCsv = new ArrayList<String[]>();
+        List<String[]> listOfCsv = new ArrayList<>();
         String[] line;
 
         while ((line = csvReader.readNext()) != null) {//чтение csv-файла

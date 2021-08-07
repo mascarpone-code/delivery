@@ -66,12 +66,12 @@ public class NomenclatureServiceImpl implements NomenclatureService {
         var nomenclatureForOrder = nomenclatureRepository.findNomenclatureForOrder();
 
         if (nomenclatureForOrder != null && !nomenclatureForOrder.isEmpty()) {
-            var nomenclatureForOrderByShopBranchId =
+            List<List<Nomenclature>> nomenclatureForOrderByShopBranchId =
                     new ArrayList<>(nomenclatureForOrder.stream()
                             .collect(Collectors.groupingBy(Nomenclature::getShopBranch)).values());//листы заказов по каждой точке
 
             for (var list : nomenclatureForOrderByShopBranchId) {
-                var nomenclatureForOrderByShopBranchIdOrderBySupplier =
+                List<List<Nomenclature>> nomenclatureForOrderByShopBranchIdOrderBySupplier =
                         new ArrayList<>(list.stream().collect(Collectors.groupingBy(Nomenclature::getSupplier)).values());
                 orderBySupplierAndWriteToPdfAndSend(nomenclatureForOrderByShopBranchIdOrderBySupplier);
             }
@@ -86,7 +86,7 @@ public class NomenclatureServiceImpl implements NomenclatureService {
         var nomenclatureForOrderByShopBranchId = nomenclatureRepository.findNomenclatureForOrderForShopBranchId(shopBranch);
 
         if (nomenclatureForOrderByShopBranchId != null && !nomenclatureForOrderByShopBranchId.isEmpty()) {
-            var nomenclatureForOrderByShopBranchIdOrderBySupplier =
+            List<List<Nomenclature>> nomenclatureForOrderByShopBranchIdOrderBySupplier =
                     new ArrayList<>(nomenclatureForOrderByShopBranchId.stream().collect(Collectors.groupingBy(Nomenclature::getSupplier)).values());
             orderBySupplierAndWriteToPdfAndSend(nomenclatureForOrderByShopBranchIdOrderBySupplier);
         } else {

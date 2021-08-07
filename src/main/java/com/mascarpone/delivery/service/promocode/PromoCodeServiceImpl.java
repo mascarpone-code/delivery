@@ -95,7 +95,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
 
             if (!newPromoCode.equals(oldPromoCode)) {
                 var promoCodes = promoCodeRepository.findAllByShop(shop.getId(), oldPromoCode);
-                var codes = new ArrayList<>();
+                List<String> codes = new ArrayList<>();
 
                 for (var code : promoCodes) {
                     codes.add(code.getPromoCode());
@@ -111,7 +111,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
             promoCode.setDateCreate(requestedPromoCode.getDateCreate());
         } else {
             var promoCodes = shop.getPromoCodes();
-            var codes = new ArrayList<>();
+            List<String> codes = new ArrayList<>();
 
             for (var code : promoCodes) {
                 codes.add(code.getPromoCode());

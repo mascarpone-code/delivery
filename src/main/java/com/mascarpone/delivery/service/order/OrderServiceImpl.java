@@ -386,7 +386,7 @@ public class OrderServiceImpl implements OrderService {
                     });
 
             var orderAccessories = order.getOrderAccessories();
-            var currentOrderAccessories = new ArrayList<OrderAccessory>();
+            List<OrderAccessory> currentOrderAccessories = new ArrayList<>();
 
             if (orderAccessories != null) {
                 orderAccessories
@@ -431,7 +431,7 @@ public class OrderServiceImpl implements OrderService {
         var orders = orderRepository.findAllByCreatorIdOrderByDateCreateDesc(customerId,
                 PageRequest.of(page.orElse(DEFAULT_PAGE), FETCH_RECORD_COUNT));
 
-        var userOrderResponses = new ArrayList<UserOrderResponse>();
+        List<UserOrderResponse> userOrderResponses = new ArrayList<>();
 
         for (var order : orders) {
             var branch = shopBranchRepository.findByIdAndShop(order.getShopBranchId(), order.getShop())

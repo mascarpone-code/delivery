@@ -15,4 +15,5 @@ public class Constants {
     public static final Long MILLIS_IN_12_HOURS = 43200000L;
     public static final String COOK_NEW_ORDER_MESSAGE = "New order received!";
     public static final Integer MAX_IMAGE_SIDE_SIZE = 800;
+    public static final Integer CUSTOMER_PUSH_TOKEN_MAX_COUNT = 3;
 }
