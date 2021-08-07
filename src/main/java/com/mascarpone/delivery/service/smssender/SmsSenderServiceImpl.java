@@ -1,6 +1,5 @@
 package com.mascarpone.delivery.service.smssender;
 
-import com.mascarpone.delivery.sms.ApiServerSmsc;
 import com.mascarpone.delivery.sms.RetrofitClientSmsc;
 import com.mascarpone.delivery.sms.model.StatusSendSmsc;
 import org.springframework.core.env.Environment;
@@ -20,10 +19,10 @@ public class SmsSenderServiceImpl implements SmsSenderService {
     @Override
     public void sendSms(String phoneNumber, String code) {
         try {
-            ApiServerSmsc apiServerSMS = RetrofitClientSmsc.getApiService(env.getRequiredProperty("sms.url"));
+            var apiServerSMS = RetrofitClientSmsc.getApiService(env.getRequiredProperty("sms.url"));
 
-            String SMSC_CHARSET = "utf-8";
-            Call<StatusSendSmsc> sendSmsCall = apiServerSMS.sendSms(
+            var SMSC_CHARSET = "utf-8";
+            var sendSmsCall = apiServerSMS.sendSms(
                     env.getRequiredProperty("sms.login"),
                     env.getRequiredProperty("sms.password"),
                     phoneNumber,

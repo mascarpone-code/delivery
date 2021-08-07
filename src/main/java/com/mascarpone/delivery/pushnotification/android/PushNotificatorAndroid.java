@@ -18,11 +18,11 @@ public class PushNotificatorAndroid implements PushNotificatorInterface {
 
     @Override
     public void sendPushMessage(String token, GeneralSocketResponse generalSocketResponse, String tokenForPush) {
-        AndroidPushRequest androidPushRequest = new AndroidPushRequest();
+        var androidPushRequest = new AndroidPushRequest();
         androidPushRequest.setTo(token);
         androidPushRequest.setData(generalSocketResponse);
 
-        Call<AndroidPushResponse> requestFireBasePush = apiPushAndroid.sendPushMessage(
+        var requestFireBasePush = apiPushAndroid.sendPushMessage(
                 "application/json", tokenForPush, androidPushRequest);
 
         requestFireBasePush.enqueue(new Callback<AndroidPushResponse>() {

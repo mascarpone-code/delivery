@@ -2,8 +2,6 @@ package com.mascarpone.delivery.service.modifier;
 
 import com.mascarpone.delivery.entity.modifier.Modifier;
 import com.mascarpone.delivery.entity.product.Product;
-import com.mascarpone.delivery.entity.shop.Shop;
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.payload.GeneralAnswer;
 import com.mascarpone.delivery.payload.modifier.ModifierClientResponse;
@@ -58,7 +56,7 @@ public class ModifierServiceImpl implements ModifierService {
 
     @Override
     public Page<Modifier> findAllByShopIdAndName(Modifier modifier, int page, int size) {
-        Specification<Modifier> specification = Specification.where(new ModifierSpecification(modifier));
+        var specification = Specification.where(new ModifierSpecification(modifier));
         return modifierRepository.findAll(specification, PageRequest.of(page, size, Sort.Direction.DESC, "dateCreate"));
     }
 
@@ -84,15 +82,15 @@ public class ModifierServiceImpl implements ModifierService {
         checkUnit(modifier.getUnit().getId());
 
         if (modifier.getId() != null) {
-            Shop shop = getShop(shopAdminId);
-            Modifier requestedModifier = modifierRepository.findByIdAndShop(modifier.getId(), shop)
+            var shop = getShop(shopAdminId);
+            var requestedModifier = modifierRepository.findByIdAndShop(modifier.getId(), shop)
                     .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
 
             modifier.setCreator(requestedModifier.getCreator());
             modifier.setDateCreate(requestedModifier.getDateCreate());
             modifier.setShop(requestedModifier.getShop());
         } else {
-            User creator = userRepository.getOne(shopAdminId);
+            var creator = userRepository.getOne(shopAdminId);
             modifier.setCreator(creator);
             modifier.setDateCreate(new Date());
             modifier.setShop(creator.getShop());
@@ -113,12 +111,12 @@ public class ModifierServiceImpl implements ModifierService {
      */
     @Override
     public ResponseEntity<?> getAllModifiersShop(Optional<Integer> page, Optional<String> name, Long shopAdminId) {
-        Modifier modifier = new Modifier();
+        var modifier = new Modifier();
         name.ifPresent(modifier::setName);
-        Shop shop = getShop(shopAdminId);
+        var shop = getShop(shopAdminId);
         modifier.setShop(shop);
 
-        Page<Modifier> modifiers = findAllByShopIdAndName(
+        var modifiers = findAllByShopIdAndName(
                 modifier,
                 page.orElse(DEFAULT_PAGE),
                 FETCH_RECORD_COUNT);
@@ -139,8 +137,8 @@ public class ModifierServiceImpl implements ModifierService {
      */
     @Override
     public ResponseEntity<?> getModifierShop(Long id, Long shopAdminId) {
-        Shop shop = getShop(shopAdminId);
-        Modifier modifier = modifierRepository.findByIdAndShop(id, shop)
+        var shop = getShop(shopAdminId);
+        var modifier = modifierRepository.findByIdAndShop(id, shop)
                 .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
 
         return ResponseEntity.ok(new ModifierResponse(modifier));
@@ -154,13 +152,13 @@ public class ModifierServiceImpl implements ModifierService {
      * @return
      */
     @Override
-    public GeneralAnswer deleteModifier(Long id, Long shopAdminId) {
-        Shop shop = getShop(shopAdminId);
-        Modifier modifier = modifierRepository.findByIdAndShop(id, shop)
+    public GeneralAnswer<String> deleteModifier(Long id, Long shopAdminId) {
+        var shop = getShop(shopAdminId);
+        var modifier = modifierRepository.findByIdAndShop(id, shop)
                 .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
         modifierRepository.delete(modifier);
 
-        return new GeneralAnswer<String>("OK", null, null);
+        return new GeneralAnswer<>("OK", null, null);
     }
 
     /**
@@ -171,10 +169,10 @@ public class ModifierServiceImpl implements ModifierService {
      */
     @Override
     public ResponseEntity<?> getProductModifiersByCustomer(Long productId) {
-        Product product = productRepository.findById(productId)
+        var product = productRepository.findById(productId)
                 .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
-        List<Modifier> modifiers = product.getModifiers();
-        List<ModifierClientResponse> response = modifiers
+        var modifiers = product.getModifiers();
+        var response = modifiers
                 .stream()
                 .map(ModifierClientResponse::new)
                 .collect(Collectors.toList());
@@ -190,9 +188,9 @@ public class ModifierServiceImpl implements ModifierService {
      */
     @Override
     public ResponseEntity<?> getModifierByCustomer(Long id) {
-        Modifier modifier = modifierRepository.findById(id)
+        var modifier = modifierRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
-        ModifierClientResponse response = new ModifierClientResponse(modifier);
+        var response = new ModifierClientResponse(modifier);
 
         return ResponseEntity.ok(response);
     }

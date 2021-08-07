@@ -1,7 +1,6 @@
 package com.mascarpone.delivery.service.pushtoken;
 
 import com.mascarpone.delivery.entity.pushtoken.PushToken;
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.payload.GeneralAnswer;
 import com.mascarpone.delivery.payload.pushtoken.CreatePushTokenRequest;
 import com.mascarpone.delivery.pushnotification.PushType;
@@ -64,20 +63,20 @@ public class PushTokenServiceImpl implements PushTokenService {
      * @return
      */
     @Override
-    public GeneralAnswer createPushToken(CreatePushTokenRequest request, Long customerId) {
-        String token = request.getToken();
-        String device = request.getDevice();
+    public GeneralAnswer<String> createPushToken(CreatePushTokenRequest request, Long customerId) {
+        var token = request.getToken();
+        var device = request.getDevice();
 
         if (!pushTokenRepository.existsByUserIdAndToken(customerId, token)) {
-            PushToken pushToken = new PushToken();
+            var pushToken = new PushToken();
             pushToken.setDevice(PushType.fromValue(device));
             pushToken.setToken(token);
-            User user = userRepository.getOne(customerId);
+            var user = userRepository.getOne(customerId);
             pushToken.setUser(user);
             pushTokenRepository.save(pushToken);
         }
 
-        List<PushToken> pushTokenList = pushTokenRepository.findAllByUserId(customerId);
+        var pushTokenList = pushTokenRepository.findAllByUserId(customerId);
 
         if (pushTokenList.size() > 3) {
             pushTokenRepository.deleteAll(pushTokenList);
@@ -93,8 +92,8 @@ public class PushTokenServiceImpl implements PushTokenService {
      * @return
      */
     @Override
-    public GeneralAnswer deleteTokens(Long customerId) {
-        List<PushToken> pushTokens = pushTokenRepository.findAllByUserId(customerId);
+    public GeneralAnswer<String> deleteTokens(Long customerId) {
+        var pushTokens = pushTokenRepository.findAllByUserId(customerId);
 
         if (!pushTokens.isEmpty()) {
             pushTokenRepository.deleteAll(pushTokens);

@@ -1,7 +1,6 @@
 package com.mascarpone.delivery.utils.shop;
 
 import com.mascarpone.delivery.entity.shop.Shop;
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.service.shop.ShopService;
 import com.mascarpone.delivery.service.unit.UnitService;
@@ -38,7 +37,7 @@ public class ShopUtils {
     }
 
     public static Shop getShop(long shopAdminId) {
-        User shopAdmin = userService.getOne(shopAdminId);
+        var shopAdmin = userService.getOne(shopAdminId);
         return shopAdmin.getShop();
     }
 }

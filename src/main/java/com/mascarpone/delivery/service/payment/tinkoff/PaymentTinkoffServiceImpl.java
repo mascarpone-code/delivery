@@ -4,14 +4,10 @@ import com.google.common.base.Joiner;
 import com.mascarpone.delivery.entity.bonustransaction.BonusTransaction;
 import com.mascarpone.delivery.entity.enums.BonusTransactionType;
 import com.mascarpone.delivery.entity.enums.PayTerminalType;
-import com.mascarpone.delivery.security.Role;
 import com.mascarpone.delivery.entity.enums.UserOrderType;
 import com.mascarpone.delivery.entity.order.UserOrder;
 import com.mascarpone.delivery.entity.payment.tinkoff.PaymentTinkoff;
-import com.mascarpone.delivery.entity.payterminal.PayTerminal;
-import com.mascarpone.delivery.entity.shop.Shop;
 import com.mascarpone.delivery.entity.user.User;
-import com.mascarpone.delivery.entity.userbonusaccount.UserBonusAccount;
 import com.mascarpone.delivery.payload.order.OrderForCookResponse;
 import com.mascarpone.delivery.payload.socket.GeneralSocketResponse;
 import com.mascarpone.delivery.payload.socket.sendmessage.SendMessageToCookResponse;
@@ -21,6 +17,7 @@ import com.mascarpone.delivery.repository.payment.tinkoff.PaymentTinkoffReposito
 import com.mascarpone.delivery.repository.payterminal.PayTerminalRepository;
 import com.mascarpone.delivery.repository.user.UserRepository;
 import com.mascarpone.delivery.repository.userbonusaccount.UserBonusAccountRepository;
+import com.mascarpone.delivery.security.Role;
 import com.mascarpone.delivery.service.websocketpush.WebSocketPushService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +52,7 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
     private final WebSocketPushService webSocketPushService;
 
     private final static String PASSWORD_KEY = "Password";
-    private static String TOKEN = "Token";
+    private static final String TOKEN = "Token";
 
     @Override
     public List<PaymentTinkoff> getAll() {
@@ -84,20 +81,20 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
 
     @Override
     public String tinkoffNotification(String tinkoffPaymentRequest, PayTerminalType payTerminalType) {
-        Map<String, String> hashMapPaymentRequest = new HashMap<>();
+        var hashMapPaymentRequest = new HashMap<String, String>();
 
-        JSONObject jObject = new JSONObject(tinkoffPaymentRequest); // json
-        String terminalKey = jObject.getString("TerminalKey");
-        String orderId = jObject.getString("OrderId");
+        var jObject = new JSONObject(tinkoffPaymentRequest); // json
+        var terminalKey = jObject.getString("TerminalKey");
+        var orderId = jObject.getString("OrderId");
         boolean success = jObject.getBoolean("Success");
-        String status = jObject.getString("Status");
+        var status = jObject.getString("Status");
         long paymentId = jObject.getLong("PaymentId");
-        String errorCode = jObject.getString("ErrorCode");
+        var errorCode = jObject.getString("ErrorCode");
         long amount = jObject.getLong("Amount");
         long cardId = jObject.getLong("CardId");
-        String pan = jObject.getString("Pan");
-        String expDate = jObject.getString("ExpDate");
-        String token = jObject.getString("Token");
+        var pan = jObject.getString("Pan");
+        var expDate = jObject.getString("ExpDate");
+        var token = jObject.getString("Token");
 
         //Добавление значений в hashMap
         hashMapPaymentRequest.put("Amount", String.valueOf(amount));
@@ -112,7 +109,7 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
         hashMapPaymentRequest.put("TerminalKey", terminalKey);
         hashMapPaymentRequest.put("Token", token);
 
-        UserOrder userOrder = new UserOrder();
+        var userOrder = new UserOrder();
 
         if (orderRepository.findByUUID(orderId).isPresent()) {
             userOrder = orderRepository.findByUUID(orderId).get();
@@ -120,11 +117,11 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
             userOrder = orderRepository.findByUUIDIos(Long.parseLong(orderId)).get();
         }
 
-        PayTerminal payTerminal = payTerminalRepository.findByShopAndTerminalType(userOrder.getShop(), payTerminalType);
-        String password = payTerminal.getPassword();
+        var payTerminal = payTerminalRepository.findByShopAndTerminalType(userOrder.getShop(), payTerminalType);
+        var password = payTerminal.getPassword();
 
         try {
-            String tokenSHA_256 = generateToken(hashMapPaymentRequest, password); //собранный токен из массива
+            var tokenSHA_256 = generateToken(hashMapPaymentRequest, password); //собранный токен из массива
             boolean validationToken = checkToken(hashMapPaymentRequest, tokenSHA_256); // сравнение токенов
 
             if (validationToken) {
@@ -146,7 +143,7 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
      * Сравнение двух токенов
      */
     private boolean checkToken(final Map<String, String> params, final String expectedToken) {
-        final String actualToken = params.get(TOKEN);
+        final var actualToken = params.get(TOKEN);
 
         return !(expectedToken == null || !expectedToken.equals(actualToken));
     }
@@ -155,10 +152,10 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
      * Генерация токена из Map
      */
     private String generateToken(final Map<String, String> parameters, String passwordValue) throws NoSuchAlgorithmException {
-        final Map<String, String> sortedParameters = new TreeMap<>(parameters);
+        final var sortedParameters = new TreeMap<>(parameters);
         sortedParameters.remove(TOKEN);
         sortedParameters.put(PASSWORD_KEY, passwordValue);
-        final String paramString = Joiner.on("").skipNulls().join(sortedParameters.values());
+        final var paramString = Joiner.on("").skipNulls().join(sortedParameters.values());
 
         return sha256(paramString);
     }
@@ -168,13 +165,17 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
      */
     private String sha256(String base) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(base.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
+            var digest = MessageDigest.getInstance("SHA-256");
+            var hash = digest.digest(base.getBytes(StandardCharsets.UTF_8));
+            var hexString = new StringBuilder();
 
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
+            for (var b : hash) {
+                var hex = Integer.toHexString(0xff & b);
+
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+
                 hexString.append(hex);
             }
 
@@ -185,15 +186,15 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
     }
 
     private void orderBonusTransactions(User customer, UserOrder userOrder, Date date) {
-        UserBonusAccount bonusAccount = customer.getBonusAccount();
-        Shop currentShop = userOrder.getShop();
-        BigDecimal userBonusAccountAmount = bonusAccount.getBonusAmount();
-        BigDecimal newBonus = userOrder.getPrice()
+        var bonusAccount = customer.getBonusAccount();
+        var currentShop = userOrder.getShop();
+        var userBonusAccountAmount = bonusAccount.getBonusAmount();
+        var newBonus = userOrder.getPrice()
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
                 .multiply(currentShop.getOrderAmountPercent());
 
         if (newBonus.compareTo(BigDecimal.valueOf(0)) != 0) {
-            BonusTransaction newBonusTransaction = new BonusTransaction();
+            var newBonusTransaction = new BonusTransaction();
             newBonusTransaction.setDateCreate(date);
             newBonusTransaction.setShop(currentShop);
             newBonusTransaction.setCustomer(customer);
@@ -206,10 +207,10 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
             userBonusAccountRepository.save(bonusAccount);
         }
 
-        BigDecimal paidByBonus = userOrder.getPaidByBonus();
+        var paidByBonus = userOrder.getPaidByBonus();
 
         if (paidByBonus.compareTo(BigDecimal.valueOf(0)) != 0) {
-            BonusTransaction newBonusTransaction = new BonusTransaction();
+            var newBonusTransaction = new BonusTransaction();
             newBonusTransaction.setDateCreate(date);
             newBonusTransaction.setShop(currentShop);
             newBonusTransaction.setCustomer(customer);
@@ -224,8 +225,8 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
     }
 
     private void paymentConfirmed(UserOrder userOrder, Date date) throws IOException {
-        Shop currentShop = userOrder.getShop();
-        User customer = userOrder.getCreator();
+        var currentShop = userOrder.getShop();
+        var customer = userOrder.getCreator();
 
         if (currentShop.isBonusSystem()) {
             orderBonusTransactions(customer, userOrder, date);
@@ -239,8 +240,8 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
 
         orderRepository.save(userOrder);
 
-        SendMessageToCookResponse sendMessageResponse = new SendMessageToCookResponse();
-        GeneralSocketResponse<Object> response = new GeneralSocketResponse<>();
+        var sendMessageResponse = new SendMessageToCookResponse();
+        var response = new GeneralSocketResponse<>();
         sendMessageResponse.setOrder(new OrderForCookResponse(userOrder));
         response.setResult(sendMessageResponse);
         response.setAccountActionType(NEWORDER);
@@ -256,8 +257,8 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
     }
 
     private void tokenValidated(JSONObject jObject, UserOrder userOrder) throws IOException {
-        Date nowDate = new Date();
-        PaymentTinkoff paymentTinkoff = new PaymentTinkoff();
+        var nowDate = new Date();
+        var paymentTinkoff = new PaymentTinkoff();
 
         paymentTinkoff.setAmount(String.valueOf(jObject.getLong("Amount")));
         paymentTinkoff.setCardId(String.valueOf(jObject.getLong("CardId")));

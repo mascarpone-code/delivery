@@ -13,7 +13,7 @@ import static com.mascarpone.delivery.utils.Constants.MAX_IMAGE_SIDE_SIZE;
 
 public class ImageResizer {
     public static byte[] resizeImage(MultipartFile image) throws IOException {
-        BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(image.getBytes()));
+        var bufferedImage = ImageIO.read(new ByteArrayInputStream(image.getBytes()));
         int height = bufferedImage.getHeight();
         int width = bufferedImage.getWidth();
 
@@ -31,15 +31,15 @@ public class ImageResizer {
             bufferedImage = resize(bufferedImage, MAX_IMAGE_SIDE_SIZE, MAX_IMAGE_SIDE_SIZE);
         }
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        var baos = new ByteArrayOutputStream();
         ImageIO.write(bufferedImage, "jpg", baos);
 
         return baos.toByteArray();
     }
 
     private static BufferedImage resize(Image image, int width, int height) {
-        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics2D = bufferedImage.createGraphics();
+        var bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        var graphics2D = bufferedImage.createGraphics();
 
         graphics2D.setComposite(AlphaComposite.Src);
         graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);

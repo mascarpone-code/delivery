@@ -1,9 +1,6 @@
 package com.mascarpone.delivery.service.productphoto;
 
-import com.mascarpone.delivery.entity.product.Product;
 import com.mascarpone.delivery.entity.productphoto.ProductPhoto;
-import com.mascarpone.delivery.entity.shop.Shop;
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.exception.InternalServerException;
 import com.mascarpone.delivery.repository.product.ProductRepository;
@@ -22,7 +19,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import static com.mascarpone.delivery.exception.ExceptionConstants.*;
+import static com.mascarpone.delivery.exception.ExceptionConstants.PHOTO_NOT_FOUND;
+import static com.mascarpone.delivery.exception.ExceptionConstants.PRODUCT_NOT_FOUND;
 import static com.mascarpone.delivery.utils.Constants.GET_PRODUCT_PHOTO_ENDPOINT;
 import static com.mascarpone.delivery.utils.ImageResizer.resizeImage;
 
@@ -64,12 +62,12 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
      */
     @Override
     public ResponseEntity<?> uploadProductPhoto(MultipartFile[] photos, Long productId, Long shopAdminId) throws IOException {
-        User shopAdmin = userRepository.getOne(shopAdminId);
-        Product product = productRepository.findByIdAndShop(productId, shopAdmin.getShop())
+        var shopAdmin = userRepository.getOne(shopAdminId);
+        var product = productRepository.findByIdAndShop(productId, shopAdmin.getShop())
                 .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
 
-        for (MultipartFile photo : photos) {
-            ProductPhoto newProductPhoto = new ProductPhoto();
+        for (var photo : photos) {
+            var newProductPhoto = new ProductPhoto();
             newProductPhoto.setImage(resizeImage(photo));
             newProductPhoto.setMimeType(photo.getContentType());
             newProductPhoto.setProduct(product);
@@ -78,7 +76,7 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
             productPhotoRepository.save(newProductPhoto);
         }
 
-        List<ProductPhoto> productPhotos = productPhotoRepository.findAllByProduct(product);
+        var productPhotos = productPhotoRepository.findAllByProduct(product);
 
         return ResponseEntity.ok(productPhotos);
     }
@@ -91,9 +89,9 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
      */
     @Override
     public ResponseEntity<?> getProductPhotos(Long productId) {
-        Product product = productRepository.findById(productId)
+        var product = productRepository.findById(productId)
                 .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
-        List<ProductPhoto> productPhotos = productPhotoRepository.findAllByProduct(product);
+        var productPhotos = productPhotoRepository.findAllByProduct(product);
 
         return ResponseEntity.ok(productPhotos);
     }
@@ -106,11 +104,11 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
      */
     @Override
     public void getProductPhoto(Long id, HttpServletResponse response) {
-        ProductPhoto productPhoto = productPhotoRepository.findById(id)
+        var productPhoto = productPhotoRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException(PHOTO_NOT_FOUND));
 
         try {
-            ByteArrayInputStream imageStream = new ByteArrayInputStream(productPhoto.getImage());
+            var imageStream = new ByteArrayInputStream(productPhoto.getImage());
             response.setContentType(productPhoto.getMimeType());
             IOUtils.copy(imageStream, response.getOutputStream());
             response.flushBuffer();
@@ -128,17 +126,17 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
      */
     @Override
     public ResponseEntity<?> deleteProductPhoto(Long photoId, Long shopAdminId) {
-        User shopAdmin = userRepository.getOne(shopAdminId);
-        ProductPhoto productPhoto = productPhotoRepository.findById(photoId)
+        var shopAdmin = userRepository.getOne(shopAdminId);
+        var productPhoto = productPhotoRepository.findById(photoId)
                 .orElseThrow(() -> new BadRequestException(PHOTO_NOT_FOUND));
 
-        Shop productPhotoShop = productPhoto.getProduct().getShop();
-        Shop adminShop = shopAdmin.getShop();
+        var productPhotoShop = productPhoto.getProduct().getShop();
+        var adminShop = shopAdmin.getShop();
 
         if (productPhotoShop.equals(adminShop)) {
             productPhotoRepository.delete(productPhoto);
-            Product product = productPhoto.getProduct();
-            List<ProductPhoto> productPhotos = productPhotoRepository.findAllByProduct(product);
+            var product = productPhoto.getProduct();
+            var productPhotos = productPhotoRepository.findAllByProduct(product);
 
             return ResponseEntity.ok(productPhotos);
         } else {

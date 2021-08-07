@@ -1,7 +1,6 @@
 package com.mascarpone.delivery.utils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class KeyGenerator {
@@ -114,11 +113,11 @@ public class KeyGenerator {
         }
 
         // Variables.
-        StringBuilder password = new StringBuilder(length);
-        Random random = new Random(System.nanoTime());
+        var password = new StringBuilder(length);
+        var random = new Random(System.nanoTime());
 
         // Collect the categories to use.
-        List<String> charCategories = new ArrayList<String>(4);
+        var charCategories = new ArrayList<String>(4);
         if (useLower) {
             charCategories.add(LOWER);
         }
@@ -134,7 +133,7 @@ public class KeyGenerator {
 
         // Build the password.
         for (int i = 0; i < length; i++) {
-            String charCategory = charCategories.get(random.nextInt(charCategories.size()));
+            var charCategory = charCategories.get(random.nextInt(charCategories.size()));
             int position = random.nextInt(charCategory.length());
             password.append(charCategory.charAt(position));
         }

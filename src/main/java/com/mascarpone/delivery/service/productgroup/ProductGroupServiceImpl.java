@@ -1,8 +1,6 @@
 package com.mascarpone.delivery.service.productgroup;
 
 import com.mascarpone.delivery.entity.productgroup.ProductGroup;
-import com.mascarpone.delivery.entity.shop.Shop;
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.payload.GeneralAnswer;
 import com.mascarpone.delivery.payload.productgroup.ProductGroupCountResponse;
@@ -54,7 +52,7 @@ public class ProductGroupServiceImpl implements ProductGroupService {
 
     @Override
     public Page<ProductGroup> findAllByShopIdAndName(ProductGroup group, int page, int size) {
-        Specification<ProductGroup> specification = Specification.where(new ProductGroupSpecification(group));
+        var specification = Specification.where(new ProductGroupSpecification(group));
 
         return productGroupRepository.findAll(specification, PageRequest.of(page, size, Sort.Direction.ASC, "ordinalNumber"));
     }
@@ -79,14 +77,14 @@ public class ProductGroupServiceImpl implements ProductGroupService {
     @Override
     public ResponseEntity<?> createOrUpdateProductGroup(ProductGroup productGroup, Long shopAdminId) {
         if (productGroup.getId() != null) {
-            Shop shop = getShop(shopAdminId);
-            ProductGroup requestedProductGroup = productGroupRepository.findByIdAndShop(productGroup.getId(), shop)
+            var shop = getShop(shopAdminId);
+            var requestedProductGroup = productGroupRepository.findByIdAndShop(productGroup.getId(), shop)
                     .orElseThrow(() -> new BadRequestException(GROUP_NOT_FOUND));
 
             productGroup.setCreator(requestedProductGroup.getCreator());
             productGroup.setShop(requestedProductGroup.getShop());
         } else {
-            User creator = userRepository.getOne(shopAdminId);
+            var creator = userRepository.getOne(shopAdminId);
             productGroup.setCreator(creator);
             productGroup.setShop(creator.getShop());
         }
@@ -106,19 +104,19 @@ public class ProductGroupServiceImpl implements ProductGroupService {
      */
     @Override
     public ResponseEntity<?> getAllProductGroupsByShopAdmin(Optional<Integer> page, Optional<String> name, Long shopAdminId) {
-        ProductGroup productGroup = new ProductGroup();
+        var productGroup = new ProductGroup();
         name.ifPresent(productGroup::setName);
-        Shop shop = getShop(shopAdminId);
+        var shop = getShop(shopAdminId);
         productGroup.setShop(shop);
 
-        Page<ProductGroup> productGroups = findAllByShopIdAndName(
+        var productGroups = findAllByShopIdAndName(
                 productGroup,
                 page.orElse(DEFAULT_PAGE),
                 FETCH_RECORD_COUNT);
 
-        List<ProductGroup> productGroupList = productGroups.getContent();
+        var productGroupList = productGroups.getContent();
         long totalProductGroupCount = productGroups.getTotalElements();
-        ProductGroupCountResponse response = new ProductGroupCountResponse(productGroupList, totalProductGroupCount);
+        var response = new ProductGroupCountResponse(productGroupList, totalProductGroupCount);
 
         return ResponseEntity.ok(response);
     }
@@ -131,8 +129,8 @@ public class ProductGroupServiceImpl implements ProductGroupService {
      */
     @Override
     public ResponseEntity<?> getProductGroupByShopAdmin(Long id, Long shopAdminId) {
-        Shop shop = getShop(shopAdminId);
-        ProductGroup productGroup = productGroupRepository.findByIdAndShop(id, shop)
+        var shop = getShop(shopAdminId);
+        var productGroup = productGroupRepository.findByIdAndShop(id, shop)
                 .orElseThrow(() -> new BadRequestException(GROUP_NOT_FOUND));
 
         return ResponseEntity.ok(productGroup);
@@ -145,9 +143,9 @@ public class ProductGroupServiceImpl implements ProductGroupService {
      * @return
      */
     @Override
-    public GeneralAnswer deleteProductGroup(Long id, Long shopAdminId) {
-        Shop shop = getShop(shopAdminId);
-        ProductGroup productGroup = productGroupRepository.findByIdAndShop(id, shop)
+    public GeneralAnswer<String> deleteProductGroup(Long id, Long shopAdminId) {
+        var shop = getShop(shopAdminId);
+        var productGroup = productGroupRepository.findByIdAndShop(id, shop)
                 .orElseThrow(() -> new BadRequestException(GROUP_NOT_FOUND));
 
         if (!productRepository.findAllByProductGroup(productGroup).isEmpty()) {
@@ -156,7 +154,7 @@ public class ProductGroupServiceImpl implements ProductGroupService {
 
         productGroupRepository.delete(productGroup);
 
-        return new GeneralAnswer<String>("OK", null, null);
+        return new GeneralAnswer<>("OK", null, null);
     }
 
     /**
@@ -168,8 +166,8 @@ public class ProductGroupServiceImpl implements ProductGroupService {
     @Override
     public ResponseEntity<?> getProductGroupsByCustomer(Long shopId) {
         ShopUtils.checkShop(shopId);
-        List<ProductGroup> productGroups = productGroupRepository.findAllByShopIdAndActiveTrueOrderByOrdinalNumber(shopId);
-        List<ProductGroupForUserResponse> response = productGroups
+        var productGroups = productGroupRepository.findAllByShopIdAndActiveTrueOrderByOrdinalNumber(shopId);
+        var response = productGroups
                 .stream()
                 .map(ProductGroupForUserResponse::new)
                 .collect(Collectors.toList());

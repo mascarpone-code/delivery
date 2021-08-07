@@ -1,10 +1,8 @@
 package com.mascarpone.delivery.service.product;
 
-import com.mascarpone.delivery.entity.modifier.Modifier;
 import com.mascarpone.delivery.entity.product.Product;
 import com.mascarpone.delivery.entity.productgroup.ProductGroup;
 import com.mascarpone.delivery.entity.shop.Shop;
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.payload.GeneralAnswer;
 import com.mascarpone.delivery.payload.product.CreatedProductResponse;
@@ -82,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<Product> findAllByShopIdAndNamePageable(Product product, int page, int size) {
-        Specification<Product> specification = Specification.where(new ProductSpecification(product));
+        var specification = Specification.where(new ProductSpecification(product));
 
         return productRepository.findAll(specification, PageRequest.of(page, size, Sort.Direction.ASC, "name"));
     }
@@ -101,15 +99,15 @@ public class ProductServiceImpl implements ProductService {
         checkUnit(product.getUnit().getId());
 
         if (product.getId() != null) {
-            Shop shop = getShop(shopAdminId);
-            Product requestedProduct = productRepository.findByIdAndShop(product.getId(), shop)
+            var shop = getShop(shopAdminId);
+            var requestedProduct = productRepository.findByIdAndShop(product.getId(), shop)
                     .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
 
             product.setCreator(requestedProduct.getCreator());
             product.setShop(requestedProduct.getShop());
             product.setPhotos(requestedProduct.getPhotos());
         } else {
-            User creator = userRepository.getOne(shopAdminId);
+            var creator = userRepository.getOne(shopAdminId);
             product.setDateCreate(new Date());
             product.setCreator(creator);
             product.setShop(creator.getShop());
@@ -132,24 +130,24 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     public ResponseEntity<?> getAllProductsByShopAdmin(Optional<Integer> page, Optional<String> productName, Optional<Long> productGroupId, Long shopAdminId) {
-        Product product = new Product();
-        Shop shop = getShop(shopAdminId);
+        var product = new Product();
+        var shop = getShop(shopAdminId);
         product.setShop(shop);
         productName.ifPresent(product::setName);
         productGroupId.ifPresent(groupId -> product.setProductGroup(productGroupRepository.getOne(groupId)));
 
-        Page<Product> products = findAllByShopIdAndNamePageable(
+        var products = findAllByShopIdAndNamePageable(
                 product,
                 page.orElse(DEFAULT_PAGE),
                 FETCH_RECORD_COUNT);
 
-        List<ProductResponse> productResponses = products
+        var productResponses = products
                 .stream()
                 .map(ProductResponse::new)
                 .collect(Collectors.toList());
 
         long totalProductCount = products.getTotalElements();
-        ProductListResponse response = new ProductListResponse(productResponses, totalProductCount);
+        var response = new ProductListResponse(productResponses, totalProductCount);
 
         return ResponseEntity.ok(response);
     }
@@ -163,10 +161,10 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     public ResponseEntity<?> getProductByShopAdmin(Long id, Long shopAdminId) {
-        Shop shop = getShop(shopAdminId);
-        Product product = productRepository.findByIdAndShop(id, shop)
+        var shop = getShop(shopAdminId);
+        var product = productRepository.findByIdAndShop(id, shop)
                 .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
-        ProductResponse response = new ProductResponse(product);
+        var response = new ProductResponse(product);
 
         return ResponseEntity.ok(response);
     }
@@ -180,8 +178,8 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     public GeneralAnswer<String> deleteProduct(Long id, Long shopAdminId) {
-        Shop shopId = getShop(shopAdminId);
-        Product product = productRepository.findByIdAndShop(id, shopId)
+        var shopId = getShop(shopAdminId);
+        var product = productRepository.findByIdAndShop(id, shopId)
                 .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
         productRepository.delete(product);
 
@@ -196,10 +194,10 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     public ResponseEntity<?> getShopProductsByCustomer(Long shopId) {
-        Shop shop = shopRepository.findById(shopId)
+        var shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new BadRequestException(SHOP_NOT_FOUND));
-        List<Product> products = productRepository.findAllByShop(shop);
-        List<CreatedProductResponse> responses = products
+        var products = productRepository.findAllByShop(shop);
+        var responses = products
                 .stream()
                 .map(CreatedProductResponse::new)
                 .collect(Collectors.toList());
@@ -215,10 +213,10 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     public ResponseEntity<?> getProductGroupProductsByCustomer(Long productGroupId) {
-        ProductGroup productGroup = productGroupRepository.findById(productGroupId)
+        var productGroup = productGroupRepository.findById(productGroupId)
                 .orElseThrow(() -> new BadRequestException(GROUP_NOT_FOUND));
-        List<Product> products = productRepository.findAllByProductGroup(productGroup);
-        List<CreatedProductResponse> responses = products
+        var products = productRepository.findAllByProductGroup(productGroup);
+        var responses = products
                 .stream()
                 .map(CreatedProductResponse::new)
                 .collect(Collectors.toList());
@@ -234,9 +232,9 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     public ResponseEntity<?> getProductByCustomer(Long id) {
-        Product product = productRepository.findById(id)
+        var product = productRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
-        CreatedProductResponse response = new CreatedProductResponse(product);
+        var response = new CreatedProductResponse(product);
 
         return ResponseEntity.ok(response);
     }
@@ -258,7 +256,7 @@ public class ProductServiceImpl implements ProductService {
      * @param product - product entity
      */
     private void checkModifiers(Product product) {
-        for (Modifier modifier : product.getModifiers()) {
+        for (var modifier : product.getModifiers()) {
             if (modifierRepository.findById(modifier.getId()).isEmpty()) {
                 throw new BadRequestException(MODIFIER_NOT_FOUND);
             }

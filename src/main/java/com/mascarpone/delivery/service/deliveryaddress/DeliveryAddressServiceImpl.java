@@ -61,8 +61,8 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
      */
     @Override
     public ResponseEntity<?> addDeliveryAddress(DeliveryAddress address, Long customerId) {
-        User currentUser = userRepository.getOne(customerId);
-        List<DeliveryAddress> customerAddresses = deliveryAddressRepository.findAllByUser(currentUser);
+        var currentUser = userRepository.getOne(customerId);
+        var customerAddresses = deliveryAddressRepository.findAllByUser(currentUser);
 
         if (customerAddresses.isEmpty()) {
             address.setCurrent(true);
@@ -72,7 +72,7 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
             if (address.getId() == null) {
                 address.setCurrent(false);
             } else {
-                DeliveryAddress requestedAddress = deliveryAddressRepository.getOne(address.getId());
+                var requestedAddress = deliveryAddressRepository.getOne(address.getId());
                 address.setCurrent(requestedAddress.getCurrent());
             }
         } else if (address.getCurrent()) {
@@ -85,7 +85,7 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
         }
 
         if (address.getId() != null) {
-            DeliveryAddress requestedAddress = deliveryAddressRepository.getOne(address.getId());
+            var requestedAddress = deliveryAddressRepository.getOne(address.getId());
             address.setUser(requestedAddress.getUser());
         } else {
             address.setUser(currentUser);
@@ -104,7 +104,7 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
      */
     @Override
     public ResponseEntity<?> getDeliveryAddressesByCustomer(Long customerId) {
-        List<DeliveryAddress> deliveryAddresses = deliveryAddressRepository.findAllByUserId(customerId);
+        var deliveryAddresses = deliveryAddressRepository.findAllByUserId(customerId);
 
         return ResponseEntity.ok(deliveryAddresses);
     }
@@ -118,7 +118,7 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
      */
     @Override
     public ResponseEntity<?> getDeliveryAddressByCustomer(Long addressId, Long customerId) {
-        DeliveryAddress address = deliveryAddressRepository.findByIdAndUserId(addressId, customerId)
+        var address = deliveryAddressRepository.findByIdAndUserId(addressId, customerId)
                 .orElseThrow(() -> new BadRequestException(ADDRESS_NOT_FOUND));
 
         return ResponseEntity.ok(address);
@@ -133,10 +133,10 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
      */
     @Override
     public ResponseEntity<?> makeAddressCurrent(Long addressId, Long customerId) {
-        User currentUser = userRepository.getOne(customerId);
-        DeliveryAddress address = deliveryAddressRepository.findByIdAndUserId(addressId, currentUser.getId())
+        var currentUser = userRepository.getOne(customerId);
+        var address = deliveryAddressRepository.findByIdAndUserId(addressId, currentUser.getId())
                 .orElseThrow(() -> new BadRequestException(ADDRESS_NOT_FOUND));
-        List<DeliveryAddress> addresses = deliveryAddressRepository.findAllByUserId(currentUser.getId());
+        var addresses = deliveryAddressRepository.findAllByUserId(currentUser.getId());
 
         addresses.forEach(a -> {
             a.setCurrent(false);

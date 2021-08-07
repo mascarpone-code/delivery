@@ -14,7 +14,7 @@ public enum PushType {
 
     @JsonCreator
     public static PushType fromValue(String value) {
-        for (PushType pushType : values()) {
+        for (var pushType : values()) {
             if (pushType.name().equalsIgnoreCase(value)) {
                 return pushType;
             }

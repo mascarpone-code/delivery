@@ -1,9 +1,6 @@
 package com.mascarpone.delivery.service.promocode;
 
 import com.mascarpone.delivery.entity.promocode.PromoCode;
-import com.mascarpone.delivery.entity.shop.Shop;
-import com.mascarpone.delivery.entity.user.User;
-import com.mascarpone.delivery.entity.userbonusaccount.UserBonusAccount;
 import com.mascarpone.delivery.entity.userpromocode.UserPromoCode;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.payload.promocode.CreatedPromoCodeResponse;
@@ -21,7 +18,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -89,19 +85,19 @@ public class PromoCodeServiceImpl implements PromoCodeService {
      */
     @Override
     public ResponseEntity<?> createPromoCode(PromoCode promoCode, Long shopAdminId) {
-        User creator = userRepository.getOne(shopAdminId);
-        Shop shop = creator.getShop();
-        String newPromoCode = promoCode.getPromoCode();
+        var creator = userRepository.getOne(shopAdminId);
+        var shop = creator.getShop();
+        var newPromoCode = promoCode.getPromoCode();
 
         if (promoCode.getId() != null) {
-            PromoCode requestedPromoCode = promoCodeRepository.getOne(promoCode.getId());
-            String oldPromoCode = requestedPromoCode.getPromoCode();
+            var requestedPromoCode = promoCodeRepository.getOne(promoCode.getId());
+            var oldPromoCode = requestedPromoCode.getPromoCode();
 
             if (!newPromoCode.equals(oldPromoCode)) {
-                List<PromoCode> promoCodes = promoCodeRepository.findAllByShop(shop.getId(), oldPromoCode);
-                List<String> codes = new ArrayList<>();
+                var promoCodes = promoCodeRepository.findAllByShop(shop.getId(), oldPromoCode);
+                var codes = new ArrayList<>();
 
-                for (PromoCode code : promoCodes) {
+                for (var code : promoCodes) {
                     codes.add(code.getPromoCode());
                 }
 
@@ -114,10 +110,10 @@ public class PromoCodeServiceImpl implements PromoCodeService {
             promoCode.setShop(requestedPromoCode.getShop());
             promoCode.setDateCreate(requestedPromoCode.getDateCreate());
         } else {
-            List<PromoCode> promoCodes = shop.getPromoCodes();
-            List<String> codes = new ArrayList<>();
+            var promoCodes = shop.getPromoCodes();
+            var codes = new ArrayList<>();
 
-            for (PromoCode code : promoCodes) {
+            for (var code : promoCodes) {
                 codes.add(code.getPromoCode());
             }
 
@@ -131,7 +127,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
         }
 
         promoCodeRepository.save(promoCode);
-        CreatedPromoCodeResponse response = new CreatedPromoCodeResponse(promoCode);
+        var response = new CreatedPromoCodeResponse(promoCode);
 
         return ResponseEntity.ok(response);
     }
@@ -147,8 +143,8 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     @Override
     public ResponseEntity<?> getPromoCodesByShopAdmin(Optional<Integer> page, boolean active, Long shopAdminId) {
         Page<PromoCode> promoCodes;
-        Date nowDate = new Date();
-        User shopAdmin = userRepository.getOne(shopAdminId);
+        var nowDate = new Date();
+        var shopAdmin = userRepository.getOne(shopAdminId);
         long shopId = shopAdmin.getShop().getId();
 
         if (active) {
@@ -157,12 +153,12 @@ public class PromoCodeServiceImpl implements PromoCodeService {
             promoCodes = promoCodeRepository.findAllByShopId(shopId, PageRequest.of(page.orElse(DEFAULT_PAGE), FETCH_RECORD_COUNT));
         }
 
-        List<CreatedPromoCodeResponse> responses = promoCodes
+        var responses = promoCodes
                 .stream()
                 .map(CreatedPromoCodeResponse::new)
                 .collect(Collectors.toList());
 
-        PromoCodeListResponse response = new PromoCodeListResponse(promoCodes.getTotalElements(), responses);
+        var response = new PromoCodeListResponse(promoCodes.getTotalElements(), responses);
 
         return ResponseEntity.ok(response);
     }
@@ -176,10 +172,10 @@ public class PromoCodeServiceImpl implements PromoCodeService {
      */
     @Override
     public ResponseEntity<?> getPromoCode(Long promoCodeId, Long shopAdminId) {
-        User shopAdmin = userRepository.getOne(shopAdminId);
-        PromoCode promoCode = promoCodeRepository.findByIdAndShop(promoCodeId, shopAdmin.getShop())
+        var shopAdmin = userRepository.getOne(shopAdminId);
+        var promoCode = promoCodeRepository.findByIdAndShop(promoCodeId, shopAdmin.getShop())
                 .orElseThrow(() -> new BadRequestException(PROMOCODE_NOT_FOUND));
-        CreatedPromoCodeResponse response = new CreatedPromoCodeResponse(promoCode);
+        var response = new CreatedPromoCodeResponse(promoCode);
 
         return ResponseEntity.ok(response);
     }
@@ -193,10 +189,10 @@ public class PromoCodeServiceImpl implements PromoCodeService {
      */
     @Override
     public ResponseEntity<?> applyPromoCodeByCustomer(String promoCode, Long customerId) {
-        User customer = userRepository.getOne(customerId);
-        PromoCode currentPromoCode = promoCodeRepository.findByPromoCode(promoCode)
+        var customer = userRepository.getOne(customerId);
+        var currentPromoCode = promoCodeRepository.findByPromoCode(promoCode)
                 .orElseThrow(() -> new BadRequestException(PROMOCODE_NOT_FOUND));
-        Date nowDate = new Date();
+        var nowDate = new Date();
 
         if (currentPromoCode.getValidFrom().after(nowDate) || currentPromoCode.getValidTo().before(nowDate)) {
             throw new BadRequestException(PROMOCODE_EXPIRED);
@@ -204,18 +200,18 @@ public class PromoCodeServiceImpl implements PromoCodeService {
             if (userPromoCodeRepository.existsByCustomerAndPromoCode(customer, currentPromoCode)) {
                 throw new BadRequestException(PROMOCODE_ALREADY_USED);
             } else {
-                UserPromoCode newUserPromoCode = new UserPromoCode();
+                var newUserPromoCode = new UserPromoCode();
                 newUserPromoCode.setCustomer(customer);
                 newUserPromoCode.setPromoCode(currentPromoCode);
                 newUserPromoCode.setDateCreate(nowDate);
                 userPromoCodeRepository.save(newUserPromoCode);
 
-                UserBonusAccount currentUserBonusAccount = customer.getBonusAccount();
-                BigDecimal promoCodePrice = currentPromoCode.getPrice();
+                var currentUserBonusAccount = customer.getBonusAccount();
+                var promoCodePrice = currentPromoCode.getPrice();
                 currentUserBonusAccount.setBonusAmount(currentUserBonusAccount.getBonusAmount().add(promoCodePrice));
                 userBonusAccountRepository.save(currentUserBonusAccount);
 
-                UserPromoCodeResponse response = new UserPromoCodeResponse(promoCodePrice, currentUserBonusAccount.getBonusAmount());
+                var response = new UserPromoCodeResponse(promoCodePrice, currentUserBonusAccount.getBonusAmount());
 
                 return ResponseEntity.ok(response);
             }

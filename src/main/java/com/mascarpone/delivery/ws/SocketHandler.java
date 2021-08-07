@@ -2,7 +2,6 @@ package com.mascarpone.delivery.ws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mascarpone.delivery.payload.socket.GeneralSocketError;
-import com.mascarpone.delivery.payload.socket.GeneralSocketResponse;
 import com.mascarpone.delivery.ws.command.GeneralSocketCommand;
 import com.mascarpone.delivery.ws.command.SocketCommandHelper;
 import com.mascarpone.delivery.ws.command.impl.AuthSocketCommand;
@@ -41,7 +40,7 @@ public class SocketHandler extends TextWebSocketHandler {
                 socketSessionPool.checkAuth(session);
             }
 
-            GeneralSocketResponse result = socketCommand.execute(session, message);
+            var result = socketCommand.execute(session, message);
 
             sendMessage(session, result);
         } catch (GeneralSocketException ex) {

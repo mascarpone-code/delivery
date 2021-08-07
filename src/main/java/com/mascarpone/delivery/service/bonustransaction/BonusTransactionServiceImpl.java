@@ -37,7 +37,7 @@ public class BonusTransactionServiceImpl implements BonusTransactionService {
 
     @Override
     public Page<BonusTransaction> search(BonusTransactionFilter filter, int page, int size) {
-        Specification<BonusTransaction> specification = Specification.where(new BonusTransactionSpecification(filter));
+        var specification = Specification.where(new BonusTransactionSpecification(filter));
 
         return repository.findAll(specification, PageRequest.of(page, size, Sort.Direction.DESC, "dateCreate"));
     }

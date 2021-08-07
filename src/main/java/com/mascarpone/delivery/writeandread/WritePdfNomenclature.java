@@ -24,34 +24,33 @@ public class WritePdfNomenclature {
 
     public byte[] nomenclatureReport(ShopBranch shopBranch, List<Nomenclature> nomenclatureList) {
 
-        Document document = new Document(PageSize.A4); // создали документ
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        var document = new Document(PageSize.A4); // создали документ
+        var outputStream = new ByteArrayOutputStream();
 
         try {
             PdfWriter.getInstance(document, outputStream);
             document.open(); //открыли документ для работы
 
-            BaseFont font1 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Bold.ttf", "cp1251", BaseFont.EMBEDDED);
-            BaseFont font2 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Medium.ttf", "cp1251", BaseFont.EMBEDDED);
-            BaseFont font3 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Regular.ttf", "cp1251", BaseFont.EMBEDDED);
-            Font fontRobotoRegular = new Font(font3, 14);
+            var font1 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Bold.ttf", "cp1251", BaseFont.EMBEDDED);
+            var font2 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Medium.ttf", "cp1251", BaseFont.EMBEDDED);
+            var font3 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Regular.ttf", "cp1251", BaseFont.EMBEDDED);
+            var fontRobotoRegular = new Font(font3, 14);
 
-            Paragraph p = new Paragraph("Лист заказа", new Font(font1, 16));
+            var p = new Paragraph("Лист заказа", new Font(font1, 16));
             p.setAlignment(Paragraph.ALIGN_CENTER);
             document.add(p);
 
-
-            Font fontRobotoMedium = new Font(font2, 14);
-            Paragraph pDate = new Paragraph("Дата заказа: " + LocalDate.now(), fontRobotoRegular);
+            var fontRobotoMedium = new Font(font2, 14);
+            var pDate = new Paragraph("Дата заказа: " + LocalDate.now(), fontRobotoRegular);
             pDate.setSpacingBefore(10);
             document.add(pDate);
 
-            Paragraph p2 = new Paragraph("Заказчик: " + shopBranch.getShop().getName(), fontRobotoMedium);
+            var p2 = new Paragraph("Заказчик: " + shopBranch.getShop().getName(), fontRobotoMedium);
             p2.setSpacingBefore(10);
             document.add(p2);
             writeContactInformation(document, shopBranch);
 
-            PdfPTable table = new PdfPTable(3);//создаем таблицу
+            var table = new PdfPTable(3);//создаем таблицу
             table.setWidthPercentage(100f);// ширина таблицы - 100%
             table.setWidths(new float[]{4f, 1f, 1f}); //соотношение ширины колонок
             table.setSpacingBefore(10); //интервал между таблицей и предыдущим элементом
@@ -65,12 +64,13 @@ public class WritePdfNomenclature {
         } catch (DocumentException | IOException e) {
             e.printStackTrace();
         }
+
         return outputStream.toByteArray();//данные возвращаются как byte []
     }
 
     private void writeContactInformation(Document document, ShopBranch shopBranch) throws DocumentException, IOException {
-        BaseFont font3 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Regular.ttf", "cp1251", BaseFont.EMBEDDED);
-        Font fontRobotoRegular = new Font(font3, 14);
+        var font3 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Regular.ttf", "cp1251", BaseFont.EMBEDDED);
+        var fontRobotoRegular = new Font(font3, 14);
 
         document.add(new Paragraph("Адрес доставки: " + shopBranch.getDeliveryAddress(), fontRobotoRegular));
         document.add(new Paragraph("Телефон: " + shopBranch.getPhoneNumber(), fontRobotoRegular));
@@ -81,11 +81,11 @@ public class WritePdfNomenclature {
     }
 
     private static void writeTableHeader(PdfPTable table) throws IOException, DocumentException {
-        PdfPCell cell = new PdfPCell();
+        var cell = new PdfPCell();
         cell.setPadding(5);
 
-        BaseFont font2 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Medium.ttf", "cp1251", BaseFont.EMBEDDED);
-        Font fontRobotoMedium = new Font(font2, 14);
+        var font2 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Medium.ttf", "cp1251", BaseFont.EMBEDDED);
+        var fontRobotoMedium = new Font(font2, 14);
 
         cell.setPhrase(new Phrase("Наименование", fontRobotoMedium));
         table.addCell(cell);
@@ -95,14 +95,13 @@ public class WritePdfNomenclature {
 
         cell.setPhrase(new Phrase("Ед. изм.", fontRobotoMedium));
         table.addCell(cell);
-
     }
 
     private void writeTableData(PdfPTable table, List<Nomenclature> nomenclatureList) throws IOException, DocumentException {
-        for (Nomenclature nomenclature : nomenclatureList) {
+        for (var nomenclature : nomenclatureList) {
             if (nomenclature != null) {
-                BaseFont font3 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Regular.ttf", "cp1251", BaseFont.EMBEDDED);
-                Font fontRobotoRegular = new Font(font3, 12);
+                var font3 = BaseFont.createFont("/Users/Developer/Downloads/Roboto/Roboto-Regular.ttf", "cp1251", BaseFont.EMBEDDED);
+                var fontRobotoRegular = new Font(font3, 12);
 
                 table.addCell(new PdfPCell(new Phrase(nomenclature.getName() != null ? nomenclature.getName() : " ", fontRobotoRegular)));
                 table.addCell(new PdfPCell(new Phrase(nomenclature.getQuantityForOrder() != null ? nomenclature.getQuantityForOrder().toString() : " ", fontRobotoRegular)));

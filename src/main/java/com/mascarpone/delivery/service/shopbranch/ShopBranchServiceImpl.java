@@ -1,14 +1,11 @@
 package com.mascarpone.delivery.service.shopbranch;
 
-import com.mascarpone.delivery.entity.shop.Shop;
 import com.mascarpone.delivery.entity.shopbranch.ShopBranch;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.payload.shopbranch.ShopBranchListResponse;
 import com.mascarpone.delivery.payload.shopbranch.ShopBranchResponse;
 import com.mascarpone.delivery.repository.shopbranch.ShopBranchRepository;
 import com.mascarpone.delivery.repository.shopbranch.specification.ShopBranchSpecification;
-import com.mascarpone.delivery.repository.user.UserRepository;
-import com.mascarpone.delivery.service.shop.ShopService;
 import com.mascarpone.delivery.utils.shop.ShopUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +42,7 @@ public class ShopBranchServiceImpl implements ShopBranchService {
 
     @Override
     public Page<ShopBranch> getAllBranches(ShopBranch shopBranch, int page, int size) {
-        Specification<ShopBranch> specification = Specification.where(new ShopBranchSpecification(shopBranch));
+        var specification = Specification.where(new ShopBranchSpecification(shopBranch));
         return shopBranchRepository.findAll(specification, PageRequest.of(page, size, Sort.Direction.ASC, "id"));
     }
 
@@ -73,7 +70,7 @@ public class ShopBranchServiceImpl implements ShopBranchService {
      */
     @Override
     public ResponseEntity<?> createOrUpdateShopBranch(ShopBranch branch, Long shopAdminId) {
-        Shop shop = getShop(shopAdminId);
+        var shop = getShop(shopAdminId);
         branch.setShop(shop);
         shopBranchRepository.save(branch);
 
@@ -90,23 +87,23 @@ public class ShopBranchServiceImpl implements ShopBranchService {
      */
     @Override
     public ResponseEntity<?> getShopBranchesByShopAdmin(Optional<Integer> page, Optional<String> name, Long shopAdminId) {
-        ShopBranch shopBranch = new ShopBranch();
-        Shop shop = getShop(shopAdminId);
+        var shopBranch = new ShopBranch();
+        var shop = getShop(shopAdminId);
         shopBranch.setShop(shop);
         name.ifPresent(shopBranch::setName);
 
-        Page<ShopBranch> branches = getAllBranches(
+        var branches = getAllBranches(
                 shopBranch,
                 page.orElse(DEFAULT_PAGE),
                 FETCH_RECORD_COUNT);
 
-        List<ShopBranchResponse> shopBranchResponses = branches
+        var shopBranchResponses = branches
                 .stream()
                 .map(ShopBranchResponse::new)
                 .collect(Collectors.toList());
 
         long totalBranchesCount = branches.getTotalElements();
-        ShopBranchListResponse response = new ShopBranchListResponse(shopBranchResponses, totalBranchesCount);
+        var response = new ShopBranchListResponse(shopBranchResponses, totalBranchesCount);
 
         return ResponseEntity.ok(response);
     }
@@ -120,8 +117,8 @@ public class ShopBranchServiceImpl implements ShopBranchService {
      */
     @Override
     public ResponseEntity<?> getShopBranchByShopAdmin(Long id, Long shopAdminId) {
-        Shop shop = getShop(shopAdminId);
-        ShopBranch shopBranch = shopBranchRepository.findByIdAndShop(id, shop)
+        var shop = getShop(shopAdminId);
+        var shopBranch = shopBranchRepository.findByIdAndShop(id, shop)
                 .orElseThrow(() -> new BadRequestException(BRANCH_NOT_FOUND));
 
         return ResponseEntity.ok(shopBranch);
@@ -136,7 +133,7 @@ public class ShopBranchServiceImpl implements ShopBranchService {
     @Override
     public ResponseEntity<?> getShopBranchesByCustomer(Long shopId) {
         ShopUtils.checkShop(shopId);
-        List<ShopBranch> shopBranches = shopBranchRepository.findAllByShopIdAndActiveTrueOrderByAddressAsc(shopId);
+        var shopBranches = shopBranchRepository.findAllByShopIdAndActiveTrueOrderByAddressAsc(shopId);
 
         return ResponseEntity.ok(shopBranches);
 
@@ -152,7 +149,7 @@ public class ShopBranchServiceImpl implements ShopBranchService {
     @Override
     public ResponseEntity<?> getShopBranchByCustomer(Long shopId, Long id) {
         ShopUtils.checkShop(shopId);
-        ShopBranch shopBranch = shopBranchRepository.findByIdAndShopId(id, shopId)
+        var shopBranch = shopBranchRepository.findByIdAndShopId(id, shopId)
                 .orElseThrow(() -> new BadRequestException(BRANCH_NOT_FOUND));
 
         return ResponseEntity.ok(shopBranch);

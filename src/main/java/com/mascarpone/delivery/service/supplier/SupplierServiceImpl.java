@@ -31,7 +31,7 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Override
     public Page<Supplier> findAllWithFilterPageable(Supplier filter, int page, int size) {
-        Specification<Supplier> specification = Specification.where(new SupplierSpecification(filter));
+        var specification = Specification.where(new SupplierSpecification(filter));
 
         return supplierRepository.findAll(specification, PageRequest.of(page, size, Sort.Direction.ASC, "name"));
     }

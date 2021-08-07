@@ -2,7 +2,6 @@ package com.mascarpone.delivery.utils;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +14,7 @@ public class Utils {
     }
 
     public static String formatOrderDate(Date date) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        var dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return dateFormat.format(date)
                 .replace(" ", "")
                 .replace(":", "")
@@ -23,7 +22,7 @@ public class Utils {
     }
 
     public static String formatDate(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        var dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         return dateFormat.format(date);
     }
 

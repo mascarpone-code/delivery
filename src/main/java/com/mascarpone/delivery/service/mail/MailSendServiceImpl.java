@@ -22,7 +22,7 @@ public class MailSendServiceImpl implements MailSendService {
 
     @Override
     public void sendNewShopPassword(String email, String newPassword) {
-        SimpleMailMessage message = new SimpleMailMessage();
+        var message = new SimpleMailMessage();
         message.setFrom(rootAdminEmail);
         message.setTo(email);
         message.setSubject("Пароль от Вашей учётной записи на DELIVERY");
@@ -32,7 +32,7 @@ public class MailSendServiceImpl implements MailSendService {
 
     @Override
     public void requestNewPassword(String shopPrefix, String shopEmail) {
-        SimpleMailMessage message = new SimpleMailMessage();
+        var message = new SimpleMailMessage();
         message.setFrom(rootAdminEmail);
         message.setTo(rootAdminEmail);
         message.setSubject("Запрос на сброс пароля");
@@ -42,9 +42,9 @@ public class MailSendServiceImpl implements MailSendService {
 
     @Override
     public void sendNomenclatureForOrder(String supplierEmail, byte[] pdf) throws MessagingException {
-        MimeMessage message = javaMailSender.createMimeMessage();
+        var message = javaMailSender.createMimeMessage();
 
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        var helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setFrom("no-reply@food-assist.ru");
         helper.setTo(supplierEmail);
         helper.setSubject("Заказ");
@@ -52,6 +52,5 @@ public class MailSendServiceImpl implements MailSendService {
         helper.addAttachment("Заказ.pdf", new ByteArrayResource(pdf));
 
         javaMailSender.send(message);
-
     }
 }

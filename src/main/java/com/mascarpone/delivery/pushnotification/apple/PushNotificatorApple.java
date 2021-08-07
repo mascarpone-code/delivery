@@ -22,54 +22,53 @@ public class PushNotificatorApple implements PushNotificatorInterface {
 
     @Override
     public void sendPushMessage(String token, GeneralSocketResponse generalSocketResponse, String tokenForPush) {
-        ApplePushRequest applePushRequest = new ApplePushRequest();
+        var applePushRequest = new ApplePushRequest();
 
         String[] tokenIds = {token};
         applePushRequest.setRegistration_ids(tokenIds);
         applePushRequest.setData(generalSocketResponse);
         applePushRequest.setPriority("high");
-        Notification notification = new Notification();
+        var notification = new Notification();
         notification.setSound("default");
 
         if (generalSocketResponse.getAccountActionType().equals(AccountActionType.NEWORDER)) {
-            SendMessageResponse sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
+            var sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
             notification.setBody(sendMessageResponse.getMessage());
             notification.setTitle("Поступил новый заказ");
         } else if (generalSocketResponse.getAccountActionType().equals(AccountActionType.ORDERFORMED)) {
-            SendMessageResponse sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
+            var sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
             notification.setBody(sendMessageResponse.getMessage());
             notification.setTitle("Заказ оформлен");
         } else if (generalSocketResponse.getAccountActionType().equals(AccountActionType.ORDERPREPARING)) {
-            SendMessageResponse sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
+            var sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
             notification.setBody(sendMessageResponse.getMessage());
             notification.setTitle("Заказ готовится");
         } else if (generalSocketResponse.getAccountActionType().equals(AccountActionType.ORDERDELIVERING)) {
-            SendMessageResponse sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
+            var sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
             notification.setBody(sendMessageResponse.getMessage());
             notification.setTitle("Заказ готов");
         } else if (generalSocketResponse.getAccountActionType().equals(AccountActionType.ORDERDELIVERED)) {
-            SendMessageResponse sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
+            var sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
             notification.setBody(sendMessageResponse.getMessage());
             notification.setTitle("Заказ доставлен");
         } else if (generalSocketResponse.getAccountActionType().equals(AccountActionType.ORDERCANCELED)) {
-            SendMessageResponse sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
+            var sendMessageResponse = (SendMessageResponse) generalSocketResponse.getResult();
             notification.setBody(sendMessageResponse.getMessage());
             notification.setTitle("Заказ отменён");
         } else if (generalSocketResponse.getAccountActionType().equals(AccountActionType.FLAMPMESSAGE)) {
-            SimpleMessageResponse simpleMessageResponse = (SimpleMessageResponse) generalSocketResponse.getResult();
+            var simpleMessageResponse = (SimpleMessageResponse) generalSocketResponse.getResult();
             notification.setBody(simpleMessageResponse.getMessage());
             notification.setTitle("Flamp");
         }
 
         applePushRequest.setNotification(notification);
 
-        Call<ApplePushResponse> applePushResponseCall = apiPushApple.sendPushMessage(
+        var applePushResponseCall = apiPushApple.sendPushMessage(
                 "application/json", tokenForPush, applePushRequest);
 
         applePushResponseCall.enqueue(new Callback<ApplePushResponse>() {
             @Override
             public void onResponse(Call<ApplePushResponse> call, Response<ApplePushResponse> response) {
-                //System.out.println("response" + response.body().getSuccess());
             }
 
             @Override

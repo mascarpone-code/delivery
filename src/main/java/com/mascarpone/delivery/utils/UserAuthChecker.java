@@ -1,6 +1,5 @@
 package com.mascarpone.delivery.utils;
 
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.security.UserPrincipal;
 import com.mascarpone.delivery.service.user.UserService;
@@ -25,7 +24,7 @@ public class UserAuthChecker {
                 throw new BadRequestException(USER_NOT_FOUND);
             }
 
-            User user = userService.getOne(userPrincipal.getId());
+            var user = userService.getOne(userPrincipal.getId());
             if (user == null) {
                 throw new BadRequestException(USER_NOT_FOUND);
             }

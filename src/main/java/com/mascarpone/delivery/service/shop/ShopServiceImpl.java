@@ -1,7 +1,6 @@
 package com.mascarpone.delivery.service.shop;
 
 import com.mascarpone.delivery.entity.shop.Shop;
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.payload.shop.ShopForAdminResponse;
 import com.mascarpone.delivery.payload.shop.UpdateShopInfoRequest;
@@ -53,8 +52,8 @@ public class ShopServiceImpl implements ShopService {
      */
     @Override
     public ResponseEntity<?> updateShopInfo(UpdateShopInfoRequest request, Long shopAdminId) {
-        User shopAdmin = userRepository.getOne(shopAdminId);
-        Shop currentShop = shopRepository.findByPrefix(shopAdmin.getShopPrefix())
+        var shopAdmin = userRepository.getOne(shopAdminId);
+        var currentShop = shopRepository.findByPrefix(shopAdmin.getShopPrefix())
                 .orElseThrow(() -> new BadRequestException(SHOP_NOT_FOUND));
 
         if (!currentShop.isDelivery()

@@ -18,7 +18,7 @@ public class TokenProvider {
     private static final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
 
     public String createToken(Authentication authentication) {
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        var userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
         return buildAuthToken(userPrincipal.getId(), new Date());
     }
@@ -33,7 +33,7 @@ public class TokenProvider {
     }
 
     public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser()
+        var claims = Jwts.parser()
                 .setSigningKey(TOKEN_SECRET)
                 .parseClaimsJws(token)
                 .getBody();

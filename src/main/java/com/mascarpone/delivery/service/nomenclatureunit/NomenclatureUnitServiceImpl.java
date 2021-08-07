@@ -21,7 +21,7 @@ public class NomenclatureUnitServiceImpl implements NomenclatureUnitService {
 
     @Override
     public Page<NomenclatureUnit> findAllPageable(NomenclatureUnit filter, int page, int size) {
-        Specification<NomenclatureUnit> specification = Specification.where(new NomenclatureUnitSpecification(filter));
+        var specification = Specification.where(new NomenclatureUnitSpecification(filter));
 
         return repository.findAll(specification, PageRequest.of(page, size, Sort.Direction.ASC, "name"));
     }

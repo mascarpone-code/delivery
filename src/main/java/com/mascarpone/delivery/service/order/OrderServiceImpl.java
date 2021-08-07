@@ -1,17 +1,10 @@
 package com.mascarpone.delivery.service.order;
 
-import com.mascarpone.delivery.entity.deliveryarea.DeliveryArea;
 import com.mascarpone.delivery.entity.enums.OrderStatus;
 import com.mascarpone.delivery.entity.enums.UserOrderType;
-import com.mascarpone.delivery.entity.modifier.Modifier;
 import com.mascarpone.delivery.entity.order.UserOrder;
 import com.mascarpone.delivery.entity.orderaccessory.OrderAccessory;
-import com.mascarpone.delivery.entity.ordermodifier.OrderModifier;
-import com.mascarpone.delivery.entity.orderproduct.OrderProduct;
-import com.mascarpone.delivery.entity.product.Product;
 import com.mascarpone.delivery.entity.shop.Shop;
-import com.mascarpone.delivery.entity.shopbranch.ShopBranch;
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.payload.order.CreatedOrderResponse;
 import com.mascarpone.delivery.payload.order.CreatedOrderWithShopBranchResponse;
@@ -196,10 +189,10 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public ResponseEntity<?> createOrder(UserOrder order, Long customerId) throws IOException {
-        User customer = userRepository.getOne(customerId);
-        Shop currentShop = customer.getShop();
-        List<OrderProduct> orderProducts = order.getOrderProducts();
-        Date orderCreateDate = new Date();
+        var customer = userRepository.getOne(customerId);
+        var currentShop = customer.getShop();
+        var orderProducts = order.getOrderProducts();
+        var orderCreateDate = new Date();
 
         if (currentShop.getOrderBeginTime() != null && currentShop.getOrderEndTime() != null
                 && !(currentShop.getOrderBeginTime().equals(currentShop.getOrderEndTime()))) {
@@ -209,7 +202,7 @@ public class OrderServiceImpl implements OrderService {
             int hourEnd = Integer.parseInt(currentShop.getOrderEndTime().substring(0, 2));
             int minuteEnd = Integer.parseInt(currentShop.getOrderEndTime().substring(3, 5));
 
-            Calendar calendarNow = Calendar.getInstance();
+            var calendarNow = Calendar.getInstance();
             calendarNow.setTime(orderCreateDate);
 
             if (currentShop.getTimeZone() != null) {
@@ -219,10 +212,10 @@ public class OrderServiceImpl implements OrderService {
             int hourNow = calendarNow.get(Calendar.HOUR_OF_DAY);
             int minuteNow = calendarNow.get(Calendar.MINUTE);
 
-            boolean a = hourNow > hourEnd;
-            boolean b = hourNow < hourBegin;
-            boolean c = (hourNow == hourBegin) && (minuteNow < minuteBegin);
-            boolean d = (hourNow == hourEnd) && (minuteNow >= minuteEnd);
+            var a = hourNow > hourEnd;
+            var b = hourNow < hourBegin;
+            var c = (hourNow == hourBegin) && (minuteNow < minuteBegin);
+            var d = (hourNow == hourEnd) && (minuteNow >= minuteEnd);
 
             if (hourBegin <= hourEnd) {
                 if (a || b || c || d) {
@@ -240,20 +233,20 @@ public class OrderServiceImpl implements OrderService {
         }
 
         if (orderProducts != null) {
-            BigDecimal totalOrderPrice = BigDecimal.valueOf(0);
+            var totalOrderPrice = BigDecimal.valueOf(0);
             double totalOrderProteins = 0D;
             double totalOrderFats = 0D;
             double totalOrderCarbohydrates = 0D;
             double totalOrderKiloCalories = 0D;
             double totalOrderWeight = 0D;
 
-            for (OrderProduct orderProduct : orderProducts) {
+            for (var orderProduct : orderProducts) {
                 if (orderProduct.getCount() != null) {
                     int productCount = orderProduct.getCount();
                     long productId = orderProduct.getProductId();
-                    List<OrderModifier> orderModifiers = orderProduct.getOrderModifiers();
+                    var orderModifiers = orderProduct.getOrderModifiers();
 
-                    Product product = productRepository.findByIdAndShop(productId, currentShop)
+                    var product = productRepository.findByIdAndShop(productId, currentShop)
                             .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
                     totalOrderPrice = totalOrderPrice.add((product.getPrice().multiply(BigDecimal.valueOf(productCount))));
                     totalOrderProteins += product.getProteins() * productCount;
@@ -277,15 +270,15 @@ public class OrderServiceImpl implements OrderService {
                     orderProduct.setShop(product.getShop());
 
                     if (orderModifiers != null) {
-                        for (OrderModifier orderModifier : orderModifiers) {
+                        for (var orderModifier : orderModifiers) {
                             orderModifier.setOrderProduct(orderProduct);
 
                             if (orderModifier.getCount() != null) {
                                 int modifierCount = orderModifier.getCount();
                                 long modifierId = orderModifier.getModifierId();
-                                Modifier modifier = modifierRepository.findByIdAndProducts(modifierId, product)
+                                var modifier = modifierRepository.findByIdAndProducts(modifierId, product)
                                         .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
-                                BigDecimal modifierOrderPrice =
+                                var modifierOrderPrice =
                                         modifier.getPrice()
                                                 .multiply(BigDecimal.valueOf(modifierCount))
                                                 .multiply(BigDecimal.valueOf(productCount));
@@ -327,13 +320,13 @@ public class OrderServiceImpl implements OrderService {
             order.setFullPrice(totalOrderPrice);
 
             if (currentShop.isBonusSystem()) {
-                BigDecimal customerPayByBonus = order.getPaidByBonus();
-                BigDecimal maximumBonusPay = order.getFullPrice()
+                var customerPayByBonus = order.getPaidByBonus();
+                var maximumBonusPay = order.getFullPrice()
                         .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
                         .multiply(currentShop.getBonusPayAmount());
 
                 if (customerPayByBonus.compareTo(maximumBonusPay) <= 0) {
-                    BigDecimal customerBonusAccountAmount = customer.getBonusAccount().getBonusAmount();
+                    var customerBonusAccountAmount = customer.getBonusAccount().getBonusAmount();
 
                     if (customerPayByBonus.compareTo(customerBonusAccountAmount) <= 0) {
                         order.setPaidByBonus(customerPayByBonus);
@@ -360,7 +353,7 @@ public class OrderServiceImpl implements OrderService {
             order.setStatus(OrderStatus.FORMED);
 
             if (order.getType() == DELIVERY && order.getDeliveryAreaId() != null) {
-                DeliveryArea deliveryArea = deliveryAreaRepository.getOne(order.getDeliveryAreaId());
+                var deliveryArea = deliveryAreaRepository.getOne(order.getDeliveryAreaId());
 
                 if (totalOrderPrice.compareTo(deliveryArea.getMinimumOrderAmount()) < 0) {
                     throw new BadRequestException(LOW_ORDER_PRICE);
@@ -392,8 +385,8 @@ public class OrderServiceImpl implements OrderService {
                         orderProductRepository.save(orderProduct);
                     });
 
-            List<OrderAccessory> orderAccessories = order.getOrderAccessories();
-            List<OrderAccessory> currentOrderAccessories = new ArrayList<>();
+            var orderAccessories = order.getOrderAccessories();
+            var currentOrderAccessories = new ArrayList<OrderAccessory>();
 
             if (orderAccessories != null) {
                 orderAccessories
@@ -408,16 +401,16 @@ public class OrderServiceImpl implements OrderService {
             order.setOrderAccessories(currentOrderAccessories);
 
             if (shopBranchRepository.findByIdAndShop(order.getShopBranchId(), currentShop).isPresent()) {
-                ShopBranch shopBranch = shopBranchRepository.findByIdAndShop(order.getShopBranchId(), currentShop).get();
+                var shopBranch = shopBranchRepository.findByIdAndShop(order.getShopBranchId(), currentShop).get();
                 webSocketPushService.sendMessageToShop(order, NEWORDER);
 
-                ShopBranchResponse shopBranchResponse = new ShopBranchResponse(shopBranch);
-                CreatedOrderWithShopBranchResponse response = new CreatedOrderWithShopBranchResponse(shopBranchResponse, order);
+                var shopBranchResponse = new ShopBranchResponse(shopBranch);
+                var response = new CreatedOrderWithShopBranchResponse(shopBranchResponse, order);
 
                 return ResponseEntity.ok(response);
             } else {
                 webSocketPushService.sendMessageToShop(order, NEWORDER);
-                CreatedOrderResponse response = new CreatedOrderResponse(order);
+                var response = new CreatedOrderResponse(order);
 
                 return ResponseEntity.ok(response);
             }
@@ -435,22 +428,21 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public ResponseEntity<?> getOrdersByUser(Optional<Integer> page, Long customerId) {
-        Page<UserOrder> orders = orderRepository.findAllByCreatorIdOrderByDateCreateDesc(customerId,
+        var orders = orderRepository.findAllByCreatorIdOrderByDateCreateDesc(customerId,
                 PageRequest.of(page.orElse(DEFAULT_PAGE), FETCH_RECORD_COUNT));
 
-        List<UserOrderResponse> userOrderResponses = new ArrayList<>();
-        UserOrderResponse userOrderResponse;
+        var userOrderResponses = new ArrayList<UserOrderResponse>();
 
-        for (UserOrder order : orders) {
-            ShopBranch branch = shopBranchRepository.findByIdAndShop(order.getShopBranchId(), order.getShop())
+        for (var order : orders) {
+            var branch = shopBranchRepository.findByIdAndShop(order.getShopBranchId(), order.getShop())
                     .orElseThrow(() -> new BadRequestException(BRANCH_NOT_FOUND));
-            ShopBranchResponse shopBranchResponse = new ShopBranchResponse(branch);
-            userOrderResponse = new UserOrderResponse(shopBranchResponse, order);
+            var shopBranchResponse = new ShopBranchResponse(branch);
+            var userOrderResponse = new UserOrderResponse(shopBranchResponse, order);
 
             userOrderResponses.add(userOrderResponse);
         }
 
-        UserOrderListResponse response = new UserOrderListResponse(userOrderResponses, orders.getTotalElements());
+        var response = new UserOrderListResponse(userOrderResponses, orders.getTotalElements());
 
         return ResponseEntity.ok(response);
     }

@@ -22,12 +22,12 @@ public class SocketSessionPool {
     }
 
     public void closeSession(WebSocketSession session, CloseStatus closeStatus) {
-        boolean isOnline = false;
+        var isOnline = false;
 
         try {
-            Long accountId = getSessionAccount((session)).getId();
+            var accountId = getSessionAccount((session)).getId();
 
-            for (Map.Entry<WebSocketSession, User> entry : sessions.entrySet()) {
+            for (var entry : sessions.entrySet()) {
                 if (accountId.equals(entry.getValue().getId())) {
                     if (entry.getKey().isOpen()) {
                         isOnline = true;

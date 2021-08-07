@@ -21,7 +21,7 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public Optional<Unit> findById(Long id) {
-        return findById(id);
+        return repository.findById(id);
     }
 
     @Override

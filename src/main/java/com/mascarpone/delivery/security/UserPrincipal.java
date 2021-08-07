@@ -25,7 +25,7 @@ public class UserPrincipal implements UserDetails {
     private Collection<? extends GrantedAuthority> authorities;
 
     static UserPrincipal create(User user, List<UserRole> userRoles) {
-        List<GrantedAuthority> authorities = userRoles.stream()
+        var authorities = userRoles.stream()
                 .map(userRole -> new SimpleGrantedAuthority(userRole.getRole().name()))
                 .collect(Collectors.toList());
 

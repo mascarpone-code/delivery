@@ -1,8 +1,6 @@
 package com.mascarpone.delivery.service.user;
 
 import com.mascarpone.delivery.entity.enums.AccountType;
-import com.mascarpone.delivery.security.Role;
-import com.mascarpone.delivery.entity.shop.Shop;
 import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.payload.user.UserForAdminListResponse;
 import com.mascarpone.delivery.payload.user.UserForAdminResponse;
@@ -10,6 +8,7 @@ import com.mascarpone.delivery.payload.user.UserNameAddressRequest;
 import com.mascarpone.delivery.payload.user.UserNameAddressResponse;
 import com.mascarpone.delivery.repository.user.UserRepository;
 import com.mascarpone.delivery.repository.user.specification.UserSpecification;
+import com.mascarpone.delivery.security.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -74,21 +73,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<User> findAllByShopIdAndRoles_Role(User filter, int page, int size) {
-        Specification<User> specification = Specification.where(new UserSpecification(filter));
+        var specification = Specification.where(new UserSpecification(filter));
 
         return userRepository.findAll(specification, PageRequest.of(page, size, Sort.Direction.ASC, "name"));
     }
 
     @Override
     public Optional<User> findByShopPrefixAndPhoneNumber(User user) {
-        Specification<User> specification = Specification.where(new UserSpecification(user));
+        var specification = Specification.where(new UserSpecification(user));
 
         return userRepository.findOne(specification);
     }
 
     @Override
     public Page<User> findAllByShop(User user, int page, int size) {
-        Specification<User> specification = Specification.where(new UserSpecification(user));
+        var specification = Specification.where(new UserSpecification(user));
 
         return userRepository.findAll(specification, PageRequest.of(page, size, Sort.Direction.ASC, "login"));
     }
@@ -128,24 +127,24 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public ResponseEntity<?> findUsersByPhoneNumberAndShopPrefix(String phoneNumber, Optional<Integer> page, Long shopAdminId) {
-        User user = new User();
-        Shop shop = getShop(shopAdminId);
+        var user = new User();
+        var shop = getShop(shopAdminId);
         user.setShopPrefix(shop.getPrefix());
         user.setPhoneNumber(phoneNumber);
         user.setAccountType(AccountType.CUSTOMER);
 
-        Page<User> users = findAllByShop(
+        var users = findAllByShop(
                 user,
                 page.orElse(DEFAULT_PAGE),
                 FETCH_RECORD_COUNT);
 
-        List<UserForAdminResponse> userForAdminResponses = users
+        var userForAdminResponses = users
                 .stream()
                 .map(UserForAdminResponse::new)
                 .collect(Collectors.toList());
 
         long totalCustomersCount = users.getTotalElements();
-        UserForAdminListResponse response = new UserForAdminListResponse(totalCustomersCount, userForAdminResponses);
+        var response = new UserForAdminListResponse(totalCustomersCount, userForAdminResponses);
 
         return ResponseEntity.ok(response);
     }
@@ -158,7 +157,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public ResponseEntity<?> getUserProfile(Long customerId) {
-        User currentUser = userRepository.getOne(customerId);
+        var currentUser = userRepository.getOne(customerId);
 
         return ResponseEntity.ok(new UserNameAddressResponse(currentUser));
     }
@@ -172,7 +171,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public ResponseEntity<?> updateCustomerProfile(UserNameAddressRequest request, Long customerId) {
-        User currentUser = userRepository.getOne(customerId);
+        var currentUser = userRepository.getOne(customerId);
         currentUser.setName(request.getName());
         currentUser.setAddress(request.getAddress());
         userRepository.save(currentUser);

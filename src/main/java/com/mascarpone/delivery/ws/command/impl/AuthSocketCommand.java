@@ -3,7 +3,6 @@ package com.mascarpone.delivery.ws.command.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mascarpone.delivery.entity.enums.AccountActionType;
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.payload.socket.GeneralSocketRequest;
 import com.mascarpone.delivery.payload.socket.GeneralSocketResponse;
 import com.mascarpone.delivery.payload.socket.auth.AuthSocketRequest;
@@ -37,19 +36,18 @@ public class AuthSocketCommand implements GeneralSocketCommand {
     @Override
     public GeneralSocketResponse execute(WebSocketSession session, TextMessage message) {
         try {
-            GeneralSocketRequest<AuthSocketRequest> request = mapper.readValue(message.getPayload(),
+            var request = mapper.readValue(message.getPayload(),
                     new TypeReference<GeneralSocketRequest<AuthSocketRequest>>() {
                     });
 
-            AuthSocketRequest authSocketRequest = request.getObject();
-            User account;
-            AuthSocketResponse authSocketResponse = new AuthSocketResponse("ERROR", null);
+            var authSocketRequest = request.getObject();
+            var authSocketResponse = new AuthSocketResponse("ERROR", null);
 
             if (tokenProvider.validateToken(authSocketRequest.getAccessToken())) {
-                Long userId = tokenProvider.getUserIdFromToken(authSocketRequest.getAccessToken());
+                var userId = tokenProvider.getUserIdFromToken(authSocketRequest.getAccessToken());
 
                 if (userService.findById(userId).isPresent()) {
-                    account = userService.findById(userId).get();
+                    var account = userService.findById(userId).get();
                     socketSessionPool.openSession(session, account);
                     authSocketResponse.setStatus("OK");
                     authSocketResponse.setAccountId(account.getId());

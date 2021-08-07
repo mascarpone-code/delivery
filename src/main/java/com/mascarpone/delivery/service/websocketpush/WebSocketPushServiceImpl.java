@@ -32,14 +32,14 @@ public class WebSocketPushServiceImpl implements WebSocketPushService {
 
     @Override
     public void sendMessageToShop(UserOrder order, AccountActionType type) throws IOException {
-        Map<WebSocketSession, User> sessions = socketSessionPool.getSessions();
-        GeneralSocketResponse<NewOrderSocketRequest> request = new GeneralSocketResponse<>(type, new NewOrderSocketRequest(order));
+        var sessions = socketSessionPool.getSessions();
+        var request = new GeneralSocketResponse<>(type, new NewOrderSocketRequest(order));
 
-        for (Map.Entry<WebSocketSession, User> entry : sessions.entrySet()) {
+        for (var entry : sessions.entrySet()) {
             if (order.getShop().getId().equals(entry.getValue().getShop().getId())) {
-                Set<UserRole> userRoles = userRoleService.findAllByRole(Role.SHOP);
+                var userRoles = userRoleService.findAllByRole(Role.SHOP);
 
-                for (UserRole userRole : userRoles) {
+                for (var userRole : userRoles) {
                     if (entry.getValue().getId().equals(userRole.getUser().getId())) {
                         if (entry.getKey().isOpen()) {
                             entry.getKey().sendMessage(new TextMessage(mapper.writeValueAsString(request)));
@@ -52,11 +52,11 @@ public class WebSocketPushServiceImpl implements WebSocketPushService {
 
     @Override
     public void sendMessageToUsers(List<User> users, Object object, String appPushToken) throws IOException {
-        for (User user : users) {
-            boolean isOnline = false;
-            Map<WebSocketSession, User> sessions = socketSessionPool.getSessions();
+        for (var user : users) {
+            var isOnline = false;
+            var sessions = socketSessionPool.getSessions();
 
-            for (Map.Entry<WebSocketSession, User> entry : sessions.entrySet()) {
+            for (var entry : sessions.entrySet()) {
                 if (user.getId().equals(entry.getValue().getId())) {
                     if (entry.getKey().isOpen()) {
                         isOnline = true;
@@ -66,10 +66,10 @@ public class WebSocketPushServiceImpl implements WebSocketPushService {
             }
 
             if (!isOnline) {
-                List<PushToken> pushTokens = user.getPushTokens();
+                var pushTokens = user.getPushTokens();
 
-                for (PushToken pushToken : pushTokens) {
-                    GeneralSocketResponse generalSocketResponse = (GeneralSocketResponse) object;
+                for (var pushToken : pushTokens) {
+                    var generalSocketResponse = (GeneralSocketResponse) object;
                     PushNotificationFactory.createPushNotificator(
                             pushToken.getDevice()).sendPushMessage(pushToken.getToken(),
                             generalSocketResponse,

@@ -34,8 +34,8 @@ public class SocketCommandHelper {
 
     public GeneralSocketCommand getCommand(TextMessage message) {
         try {
-            GeneralSocketRequest request = mapper.readValue(message.getPayload(), GeneralSocketRequest.class);
-            GeneralSocketCommand socketCommand = commands.get(request.getAccountActionType());
+            var request = mapper.readValue(message.getPayload(), GeneralSocketRequest.class);
+            var socketCommand = commands.get(request.getAccountActionType());
 
             if (socketCommand != null) {
                 return commands.get(request.getAccountActionType());

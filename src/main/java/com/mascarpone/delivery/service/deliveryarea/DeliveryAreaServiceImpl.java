@@ -1,9 +1,6 @@
 package com.mascarpone.delivery.service.deliveryarea;
 
-import com.mascarpone.delivery.entity.coordinatepoint.CoordinatePoint;
 import com.mascarpone.delivery.entity.deliveryarea.DeliveryArea;
-import com.mascarpone.delivery.entity.shop.Shop;
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.payload.GeneralAnswer;
 import com.mascarpone.delivery.payload.deliveryarea.DeliveryAreaIdNameMinAmountResponse;
@@ -53,16 +50,16 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
      */
     @Override
     public ResponseEntity<?> createDeliveryArea(DeliveryArea deliveryArea, Long shopAdminId) {
-        List<CoordinatePoint> coordinatePoints = deliveryArea.getCoordinatePoints();
+        var coordinatePoints = deliveryArea.getCoordinatePoints();
 
         if (deliveryArea.getId() != null) {
-            DeliveryArea requestedDeliveryArea = deliveryAreaRepository.getOne(deliveryArea.getId());
+            var requestedDeliveryArea = deliveryAreaRepository.getOne(deliveryArea.getId());
 
             if (coordinatePoints == null) {
                 deliveryArea.setCoordinatePoints(requestedDeliveryArea.getCoordinatePoints());
             } else {
                 coordinatePointRepository.deleteAll(requestedDeliveryArea.getCoordinatePoints());
-                List<CoordinatePoint> deliveryAreaCoordinatePoints = deliveryArea.getCoordinatePoints();
+                var deliveryAreaCoordinatePoints = deliveryArea.getCoordinatePoints();
                 deliveryAreaCoordinatePoints.forEach(coordinatePoint -> {
                     coordinatePoint.setDeliveryArea(deliveryArea);
                     coordinatePointRepository.save(coordinatePoint);
@@ -85,8 +82,8 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
             deliveryAreaRepository.save(deliveryArea);
         } else {
             coordinatePoints.forEach(coordinatePointRepository::save);
-            User shopAdmin = userRepository.getOne(shopAdminId);
-            Shop shop = shopAdmin.getShop();
+            var shopAdmin = userRepository.getOne(shopAdminId);
+            var shop = shopAdmin.getShop();
             deliveryArea.setShop(shop);
             deliveryAreaRepository.save(deliveryArea);
 
@@ -107,9 +104,9 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
      */
     @Override
     public ResponseEntity<?> getDeliveryAreas(String shopPrefix) {
-        Shop shop = shopRepository.findByPrefix(shopPrefix)
+        var shop = shopRepository.findByPrefix(shopPrefix)
                 .orElseThrow(() -> new BadRequestException(SHOP_NOT_FOUND));
-        List<DeliveryArea> deliveryAreas = deliveryAreaRepository.findAllByShop(shop);
+        var deliveryAreas = deliveryAreaRepository.findAllByShop(shop);
 
         return ResponseEntity.ok(deliveryAreas);
     }
@@ -122,7 +119,7 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
      */
     @Override
     public ResponseEntity<?> getDeliveryArea(Long id) {
-        DeliveryArea deliveryArea = deliveryAreaRepository.findById(id)
+        var deliveryArea = deliveryAreaRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException(DELIVERY_AREA_NOT_FOUND));
 
         return ResponseEntity.ok(deliveryArea);
@@ -136,12 +133,12 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
      * @return
      */
     @Override
-    public GeneralAnswer deleteDeliveryArea(Long areaId, Long shopAdminId) {
-        DeliveryArea deliveryArea = deliveryAreaRepository.findById(areaId)
+    public GeneralAnswer<String> deleteDeliveryArea(Long areaId, Long shopAdminId) {
+        var deliveryArea = deliveryAreaRepository.findById(areaId)
                 .orElseThrow(() -> new BadRequestException(DELIVERY_AREA_NOT_FOUND));
         deliveryAreaRepository.delete(deliveryArea);
 
-        return new GeneralAnswer<String>("OK", null, null);
+        return new GeneralAnswer<>("OK", null, null);
     }
 
     /**
@@ -154,18 +151,18 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
      */
     @Override
     public ResponseEntity<?> checkPoint(String shopPrefix, Double y, Double x) {
-        Shop shop = shopRepository.findByPrefix(shopPrefix)
+        var shop = shopRepository.findByPrefix(shopPrefix)
                 .orElseThrow(() -> new BadRequestException(SHOP_NOT_FOUND));
-        boolean pointInArea = false;
-        List<DeliveryArea> areas = deliveryAreaRepository.findAllByShop(shop);
+        var pointInArea = false;
+        var areas = deliveryAreaRepository.findAllByShop(shop);
         DeliveryArea requestedArea = null;
 
-        for (DeliveryArea area : areas) {
-            List<CoordinatePoint> coordinatePoints = area.getCoordinatePoints();
+        for (var area : areas) {
+            var coordinatePoints = area.getCoordinatePoints();
 
             int i;
             int j;
-            boolean result = false;
+            var result = false;
 
             for (i = 0, j = coordinatePoints.size() - 1; i < coordinatePoints.size(); j = i++) {
                 if ((coordinatePoints.get(i).getLatitude() > y) != (coordinatePoints.get(j).getLatitude() > y) &&
@@ -184,7 +181,7 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
         }
 
         if (pointInArea) {
-            DeliveryAreaIdNameMinAmountResponse response = new DeliveryAreaIdNameMinAmountResponse(requestedArea);
+            var response = new DeliveryAreaIdNameMinAmountResponse(requestedArea);
 
             return ResponseEntity.ok(response);
         } else {

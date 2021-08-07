@@ -84,13 +84,13 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public ResponseEntity<?> authenticateShop(LoginRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
+        var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getLogin(),
                         request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        User currentUser = userRepository.findByLogin(request.getLogin());
-        AuthResponse response = new AuthResponse(tokenProvider.createToken(authentication), currentUser.getRoles());
+        var currentUser = userRepository.findByLogin(request.getLogin());
+        var response = new AuthResponse(tokenProvider.createToken(authentication), currentUser.getRoles());
 
         return ResponseEntity.ok(response);
     }
@@ -105,9 +105,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResponseEntity<?> registerShop(SignUpRequest request) throws MessagingException {
         checkAvailableLogin(request.getLogin());
-        Shop newShop = createNewShop(request.getShopName(), request.getPrefix(), request.getPaymentBank());
+        var newShop = createNewShop(request.getShopName(), request.getPrefix(), request.getPaymentBank());
         createNewShopUser(request.getLogin(), newShop);
-        ShopNameAndPrefixResponse response = new ShopNameAndPrefixResponse(newShop);
+        var response = new ShopNameAndPrefixResponse(newShop);
 
         return ResponseEntity.ok(response);
     }
@@ -122,14 +122,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResponseEntity<?> sendPasswordResetRequest(String email) throws MessagingException {
         checkUserPresent(email);
-        User shopUser = userRepository.findByLogin(email);
-        String newPassword = keyGenerator().generate(10);
+        var shopUser = userRepository.findByLogin(email);
+        var newPassword = keyGenerator().generate(10);
         shopUser.setPassword(passwordEncoder.encode(newPassword));
         shopUser.setPasswordReset(false);
         userRepository.save(shopUser);
 
         mailSendService.sendNewShopPassword(shopUser.getLogin(), newPassword);
-        ShopNameAndPrefixResponse response = new ShopNameAndPrefixResponse(shopUser.getShop());
+        var response = new ShopNameAndPrefixResponse(shopUser.getShop());
 
         return ResponseEntity.ok(response);
     }
@@ -144,11 +144,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public GeneralAnswer<String> requestSmsCode(String phoneNumber, String shopPrefix) {
         checkPhoneNumberMask(phoneNumber);
-        String smsCode = keyGeneratorDigitsOnly().generate(4);
+        var smsCode = keyGeneratorDigitsOnly().generate(4);
         User currentUser;
-        Date currentDate = new Date();
+        var currentDate = new Date();
         String statusRegistration;
-        Shop currentShop = shopRepository.findByPrefix(shopPrefix)
+        var currentShop = shopRepository.findByPrefix(shopPrefix)
                 .orElseThrow(() -> new BadRequestException(SHOP_NOT_FOUND));
 
         if (userRepository.findByLoginAndShopPrefix(phoneNumber, shopPrefix).isPresent()) {
@@ -181,13 +181,13 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public ResponseEntity<?> checkSmsCode(CheckSmsCodeRequest request) {
-        String phoneNumber = request.getPhoneNumber();
+        var phoneNumber = request.getPhoneNumber();
         checkPhoneNumberMask(phoneNumber);
-        User currentUser = userRepository.findByLoginAndShopPrefix(phoneNumber, request.getShopPrefix())
+        var currentUser = userRepository.findByLoginAndShopPrefix(phoneNumber, request.getShopPrefix())
                 .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
-        Date currentDate = new Date();
+        var currentDate = new Date();
         checkCodeEnterTime(currentUser, currentDate);
-        int count = currentUser.getSmsCodeEnterCount();
+        var count = currentUser.getSmsCodeEnterCount();
         checkAttemptsCount(count);
         currentUser.setSmsCodeEnterCount(++count);
         userRepository.save(currentUser);
@@ -196,8 +196,8 @@ public class AuthServiceImpl implements AuthService {
         currentUser.setEnabled(true);
         userRepository.save(currentUser);
 
-        String token = tokenProvider.buildAuthToken(currentUser.getId(), currentDate);
-        AuthResponse response = new AuthResponse(token, currentUser.getRoles());
+        var token = tokenProvider.buildAuthToken(currentUser.getId(), currentDate);
+        var response = new AuthResponse(token, currentUser.getRoles());
 
         return ResponseEntity.ok(response);
     }
@@ -212,7 +212,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResponseEntity<?> registerCourier(CourierRegisterRequest request, Long shopAdminId) {
         checkAvailableLogin(request.getLogin());
-        User shopAdmin = userRepository.getOne(shopAdminId);
+        var shopAdmin = userRepository.getOne(shopAdminId);
 
         return ResponseEntity.ok(new CourierFullResponse(createNewCourier(request, shopAdmin.getShop())));
     }
@@ -225,13 +225,13 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public ResponseEntity<?> authenticateCourier(CourierAndCookLoginRequest request) {
-        String login = request.getLogin();
-        User currentUser = userRepository.findByLoginAndShopPrefix(login, request.getPrefix())
+        var login = request.getLogin();
+        var currentUser = userRepository.findByLoginAndShopPrefix(login, request.getPrefix())
                 .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
-        Authentication authentication = authenticationManager
+        var authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(login, request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        CourierAuthResponse response = new CourierAuthResponse(
+        var response = new CourierAuthResponse(
                 tokenProvider.createToken(authentication),
                 currentUser.getRoles(),
                 currentUser.getName());
@@ -249,8 +249,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResponseEntity<?> registerCook(CookRegisterRequest request, Long shopAdminId) {
         checkAvailableLogin(request.getLogin());
-        User shopAdmin = userRepository.getOne(shopAdminId);
-        CookFullResponse response = new CookFullResponse(createNewCook(request, shopAdmin.getShop()));
+        var shopAdmin = userRepository.getOne(shopAdminId);
+        var response = new CookFullResponse(createNewCook(request, shopAdmin.getShop()));
 
         return ResponseEntity.ok(response);
     }
@@ -263,13 +263,13 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public ResponseEntity<?> authenticateCook(CourierAndCookLoginRequest request) {
-        String login = request.getLogin();
-        User currentUser = userRepository.findByLoginAndShopPrefix(login, request.getPrefix())
+        var login = request.getLogin();
+        var currentUser = userRepository.findByLoginAndShopPrefix(login, request.getPrefix())
                 .orElseThrow(() -> new BadRequestException(USER_NOT_FOUND));
-        Authentication authentication = authenticationManager
+        var authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(login, request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        AuthResponse response = new AuthResponse(tokenProvider.createToken(authentication), currentUser.getRoles());
+        var response = new AuthResponse(tokenProvider.createToken(authentication), currentUser.getRoles());
 
         return ResponseEntity.ok(response);
     }
@@ -281,7 +281,7 @@ public class AuthServiceImpl implements AuthService {
      * @param password - password
      */
     private void createNewRootAdmin(String login, String password) {
-        User user = new User();
+        var user = new User();
         user.setLogin(login);
         user.setPassword(passwordEncoder.encode(password));
         user.setEnabled(true);
@@ -303,7 +303,7 @@ public class AuthServiceImpl implements AuthService {
      * @return shop entity
      */
     private Shop createNewShop(String name, String prefix, PaymentBank paymentBank) {
-        Shop shop = new Shop();
+        var shop = new Shop();
         shop.setName(name);
         shop.setPrefix(prefix);
         shop.setPaymentBank(paymentBank);
@@ -325,9 +325,9 @@ public class AuthServiceImpl implements AuthService {
      * @throws MessagingException
      */
     private void createNewShopUser(String login, Shop shop) throws MessagingException {
-        User user = new User();
+        var user = new User();
         user.setLogin(login);
-        String password = keyGenerator().generate(10);
+        var password = keyGenerator().generate(10);
         user.setPassword(passwordEncoder.encode(password));
         user.setEnabled(true);
         user.setPasswordReset(false);
@@ -349,7 +349,7 @@ public class AuthServiceImpl implements AuthService {
      * @param role - role
      */
     private void createNewUserRole(User user, Role role) {
-        UserRole userRole = new UserRole();
+        var userRole = new UserRole();
         userRole.setUser(user);
         userRole.setRole(role);
         userRoleRepository.save(userRole);
@@ -362,7 +362,7 @@ public class AuthServiceImpl implements AuthService {
      * @param shop - shop entity
      */
     private void createNewUserBonusAccount(User user, Shop shop) {
-        UserBonusAccount newUserBonusAccount = new UserBonusAccount();
+        var newUserBonusAccount = new UserBonusAccount();
         newUserBonusAccount.setCustomer(user);
         newUserBonusAccount.setBonusAmount(BigDecimal.valueOf(0));
 
@@ -385,7 +385,7 @@ public class AuthServiceImpl implements AuthService {
      * @return user entity
      */
     private User createNewUser(String phoneNumber, Shop shop) {
-        User newUser = new User();
+        var newUser = new User();
         newUser.setLogin(phoneNumber);
         newUser.setDateCreate(new Date());
         newUser.setShopPrefix(shop.getPrefix());
@@ -456,7 +456,7 @@ public class AuthServiceImpl implements AuthService {
     private User createNewCourier(CourierRegisterRequest request, Shop shop) {
         checkPhoneNumberMask(request.getPhoneNumber());
 
-        User newCourier = new User();
+        var newCourier = new User();
         newCourier.setLogin(request.getLogin());
         newCourier.setPassword(passwordEncoder.encode(request.getPassword()));
         newCourier.setName(request.getCourierName());
@@ -495,7 +495,7 @@ public class AuthServiceImpl implements AuthService {
      * @return cook entity
      */
     private User createNewCook(CookRegisterRequest request, Shop shop) {
-        User newCook = new User();
+        var newCook = new User();
         newCook.setLogin(request.getLogin());
         newCook.setPassword(passwordEncoder.encode(request.getPassword()));
         newCook.setShop(shop);
@@ -519,7 +519,7 @@ public class AuthServiceImpl implements AuthService {
      * @param shop - shop entity
      */
     private void createDefaultShopBranch(Shop shop) {
-        ShopBranch shopBranch = new ShopBranch();
+        var shopBranch = new ShopBranch();
         shopBranch.setShop(shop);
         shopBranch.setActive(true);
         shopBranchRepository.save(shopBranch);
