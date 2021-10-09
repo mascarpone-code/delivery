@@ -179,14 +179,6 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.delete(order);
     }
 
-    /**
-     * Customer creates order.
-     *
-     * @param order      - order entity
-     * @param customerId - customer's id
-     * @return created order entity
-     * @throws IOException
-     */
     @Override
     public ResponseEntity<?> createOrder(UserOrder order, Long customerId) throws IOException {
         var customer = userRepository.getOne(customerId);
@@ -232,200 +224,193 @@ public class OrderServiceImpl implements OrderService {
             throw new BadRequestException(NO_DELIVERY_ADDRESS);
         }
 
-        if (orderProducts != null) {
-            var totalOrderPrice = BigDecimal.valueOf(0);
-            double totalOrderProteins = 0D;
-            double totalOrderFats = 0D;
-            double totalOrderCarbohydrates = 0D;
-            double totalOrderKiloCalories = 0D;
-            double totalOrderWeight = 0D;
-
-            for (var orderProduct : orderProducts) {
-                if (orderProduct.getCount() != null) {
-                    int productCount = orderProduct.getCount();
-                    long productId = orderProduct.getProductId();
-                    var orderModifiers = orderProduct.getOrderModifiers();
-
-                    var product = productRepository.findByIdAndShop(productId, currentShop)
-                            .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
-                    totalOrderPrice = totalOrderPrice.add((product.getPrice().multiply(BigDecimal.valueOf(productCount))));
-                    totalOrderProteins += product.getProteins() * productCount;
-                    totalOrderFats += product.getFats() * productCount;
-                    totalOrderCarbohydrates += product.getCarbohydrates() * productCount;
-                    totalOrderKiloCalories += product.getKiloCalories() * productCount;
-                    totalOrderWeight += product.getWeight() * productCount;
-
-                    orderProduct.setName(product.getName());
-                    orderProduct.setDescription(product.getDescription());
-                    orderProduct.setUnit(product.getUnit());
-
-                    orderProduct.setPrice(product.getPrice());
-                    orderProduct.setProteins(product.getProteins());
-                    orderProduct.setFats(product.getFats());
-                    orderProduct.setCarbohydrates(product.getCarbohydrates());
-                    orderProduct.setKiloCalories(product.getKiloCalories());
-                    orderProduct.setWeight(product.getWeight());
-                    orderProduct.setCreator(customer);
-                    orderProduct.setProductGroupId(product.getProductGroup().getId());
-                    orderProduct.setShop(product.getShop());
-
-                    if (orderModifiers != null) {
-                        for (var orderModifier : orderModifiers) {
-                            orderModifier.setOrderProduct(orderProduct);
-
-                            if (orderModifier.getCount() != null) {
-                                int modifierCount = orderModifier.getCount();
-                                long modifierId = orderModifier.getModifierId();
-                                var modifier = modifierRepository.findByIdAndProducts(modifierId, product)
-                                        .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
-                                var modifierOrderPrice =
-                                        modifier.getPrice()
-                                                .multiply(BigDecimal.valueOf(modifierCount))
-                                                .multiply(BigDecimal.valueOf(productCount));
-                                double modifierProteins = modifier.getProteins() * modifierCount * productCount;
-                                double modifierFats = modifier.getFats() * modifierCount * productCount;
-                                double modifierCarbohydrates = modifier.getCarbohydrates() * modifierCount * productCount;
-                                double modifierKiloCalories = modifier.getKiloCalories() * modifierCount * productCount;
-                                double modifierWeight = modifier.getWeight() * modifierCount * productCount;
-
-                                orderModifier.setPrice(modifier.getPrice());
-                                orderModifier.setProteins(modifier.getProteins());
-                                orderModifier.setFats(modifier.getFats());
-                                orderModifier.setCarbohydrates(modifier.getCarbohydrates());
-                                orderModifier.setKiloCalories(modifier.getKiloCalories());
-                                orderModifier.setWeight(modifier.getWeight());
-                                orderModifier.setName(modifier.getName());
-                                orderModifier.setDescription(modifier.getDescription());
-                                orderModifier.setUnit(modifier.getUnit());
-                                orderModifier.setCreator(customer);
-                                orderModifier.setShop(currentShop);
-                                orderModifier.setDateCreate(orderCreateDate);
-
-                                totalOrderPrice = totalOrderPrice.add(modifierOrderPrice);
-                                totalOrderProteins += modifierProteins;
-                                totalOrderFats += modifierFats;
-                                totalOrderCarbohydrates += modifierCarbohydrates;
-                                totalOrderKiloCalories += modifierKiloCalories;
-                                totalOrderWeight += modifierWeight;
-                            } else {
-                                throw new BadRequestException(NO_COUNT);
-                            }
-                        }
-                    }
-                } else {
-                    throw new BadRequestException(NO_COUNT);
-                }
-            }
-
-            order.setFullPrice(totalOrderPrice);
-
-            if (currentShop.isBonusSystem()) {
-                var customerPayByBonus = order.getPaidByBonus();
-                var maximumBonusPay = order.getFullPrice()
-                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
-                        .multiply(currentShop.getBonusPayAmount());
-
-                if (customerPayByBonus.compareTo(maximumBonusPay) <= 0) {
-                    var customerBonusAccountAmount = customer.getBonusAccount().getBonusAmount();
-
-                    if (customerPayByBonus.compareTo(customerBonusAccountAmount) <= 0) {
-                        order.setPaidByBonus(customerPayByBonus);
-                        order.setPrice(totalOrderPrice.subtract(customerPayByBonus));
-                    } else {
-                        throw new BadRequestException(NOT_ENOUGH_BONUSES);
-                    }
-                } else {
-                    throw new BadRequestException(OUT_OFF_BONUS_LIMIT);
-                }
-            } else {
-                order.setPrice(totalOrderPrice);
-            }
-
-            order.setProteins(totalOrderProteins);
-            order.setFats(totalOrderFats);
-            order.setCarbohydrates(totalOrderCarbohydrates);
-            order.setKiloCalories(totalOrderKiloCalories);
-            order.setWeight(totalOrderWeight);
-
-            order.setDateCreate(orderCreateDate);
-            order.setCreator(customer);
-            order.setShop(currentShop);
-            order.setStatus(OrderStatus.FORMED);
-
-            if (order.getType() == DELIVERY && order.getDeliveryAreaId() != null) {
-                var deliveryArea = deliveryAreaRepository.getOne(order.getDeliveryAreaId());
-
-                if (totalOrderPrice.compareTo(deliveryArea.getMinimumOrderAmount()) < 0) {
-                    throw new BadRequestException(LOW_ORDER_PRICE);
-                }
-            }
-
-            if (orderRepository.findFirstByShopOrderByDateCreateDesc(currentShop) != null) {
-                order.setOrderNumber(orderRepository.findFirstByShopOrderByDateCreateDesc(currentShop).getOrderNumber() + 1);
-            } else {
-                order.setOrderNumber(DEFAULT_ORDER_NUMBER);
-            }
-
-            if (order.getPayType() != null) {
-                order.setPayType(order.getPayType());
-                order.setPaid(true);
-
-                if (orderRepository.findByCreatorIdAndUserOrderTypeAndPaidIsTrue(customer.getId(), UserOrderType.FIRST).isEmpty()) {
-                    order.setUserOrderType(UserOrderType.FIRST);
-                }
-            }
-
-            orderRepository.save(order);
-
-            order.setUUID(currentShop.getPrefix().toUpperCase() + formatOrderDate(orderCreateDate) + order.getOrderNumber());
-
-            orderProducts
-                    .forEach(orderProduct -> {
-                        orderProduct.setOrder(order);
-                        orderProductRepository.save(orderProduct);
-                    });
-
-            var orderAccessories = order.getOrderAccessories();
-            List<OrderAccessory> currentOrderAccessories = new ArrayList<>();
-
-            if (orderAccessories != null) {
-                orderAccessories
-                        .forEach(orderAccessory -> {
-                            orderAccessory.setName(accessoryRepository.getOne(orderAccessory.getAccessoryId()).getName());
-                            orderAccessory.setOrder(order);
-                            orderAccessoryRepository.save(orderAccessory);
-                            currentOrderAccessories.add(orderAccessory);
-                        });
-            }
-
-            order.setOrderAccessories(currentOrderAccessories);
-
-            if (shopBranchRepository.findByIdAndShop(order.getShopBranchId(), currentShop).isPresent()) {
-                var shopBranch = shopBranchRepository.findByIdAndShop(order.getShopBranchId(), currentShop).get();
-                webSocketPushService.sendMessageToShop(order, NEWORDER);
-
-                var shopBranchResponse = new ShopBranchResponse(shopBranch);
-                var response = new CreatedOrderWithShopBranchResponse(shopBranchResponse, order);
-
-                return ResponseEntity.ok(response);
-            } else {
-                webSocketPushService.sendMessageToShop(order, NEWORDER);
-                var response = new CreatedOrderResponse(order);
-
-                return ResponseEntity.ok(response);
-            }
-        } else {
+        if (orderProducts == null) {
             throw new BadRequestException(ORDER_IS_EMPTY);
+        }
+
+        var totalOrderPrice = BigDecimal.valueOf(0);
+        double totalOrderProteins = 0D;
+        double totalOrderFats = 0D;
+        double totalOrderCarbohydrates = 0D;
+        double totalOrderKiloCalories = 0D;
+        double totalOrderWeight = 0D;
+
+        for (var orderProduct : orderProducts) {
+            if (orderProduct.getCount() == null) {
+                throw new BadRequestException(NO_COUNT);
+            }
+
+            int productCount = orderProduct.getCount();
+            long productId = orderProduct.getProductId();
+            var orderModifiers = orderProduct.getOrderModifiers();
+
+            var product = productRepository.findByIdAndShop(productId, currentShop)
+                    .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
+            totalOrderPrice = totalOrderPrice.add((product.getPrice().multiply(BigDecimal.valueOf(productCount))));
+            totalOrderProteins += product.getProteins() * productCount;
+            totalOrderFats += product.getFats() * productCount;
+            totalOrderCarbohydrates += product.getCarbohydrates() * productCount;
+            totalOrderKiloCalories += product.getKiloCalories() * productCount;
+            totalOrderWeight += product.getWeight() * productCount;
+
+            orderProduct.setName(product.getName());
+            orderProduct.setDescription(product.getDescription());
+            orderProduct.setUnit(product.getUnit());
+
+            orderProduct.setPrice(product.getPrice());
+            orderProduct.setProteins(product.getProteins());
+            orderProduct.setFats(product.getFats());
+            orderProduct.setCarbohydrates(product.getCarbohydrates());
+            orderProduct.setKiloCalories(product.getKiloCalories());
+            orderProduct.setWeight(product.getWeight());
+            orderProduct.setCreator(customer);
+            orderProduct.setProductGroupId(product.getProductGroup().getId());
+            orderProduct.setShop(product.getShop());
+
+            if (orderModifiers != null) {
+                for (var orderModifier : orderModifiers) {
+                    orderModifier.setOrderProduct(orderProduct);
+
+                    if (orderModifier.getCount() == null) {
+                        throw new BadRequestException(NO_COUNT);
+                    }
+
+                    int modifierCount = orderModifier.getCount();
+                    long modifierId = orderModifier.getModifierId();
+                    var modifier = modifierRepository.findByIdAndProducts(modifierId, product)
+                            .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
+                    var modifierOrderPrice =
+                            modifier.getPrice()
+                                    .multiply(BigDecimal.valueOf(modifierCount))
+                                    .multiply(BigDecimal.valueOf(productCount));
+                    double modifierProteins = modifier.getProteins() * modifierCount * productCount;
+                    double modifierFats = modifier.getFats() * modifierCount * productCount;
+                    double modifierCarbohydrates = modifier.getCarbohydrates() * modifierCount * productCount;
+                    double modifierKiloCalories = modifier.getKiloCalories() * modifierCount * productCount;
+                    double modifierWeight = modifier.getWeight() * modifierCount * productCount;
+
+                    orderModifier.setPrice(modifier.getPrice());
+                    orderModifier.setProteins(modifier.getProteins());
+                    orderModifier.setFats(modifier.getFats());
+                    orderModifier.setCarbohydrates(modifier.getCarbohydrates());
+                    orderModifier.setKiloCalories(modifier.getKiloCalories());
+                    orderModifier.setWeight(modifier.getWeight());
+                    orderModifier.setName(modifier.getName());
+                    orderModifier.setDescription(modifier.getDescription());
+                    orderModifier.setUnit(modifier.getUnit());
+                    orderModifier.setCreator(customer);
+                    orderModifier.setShop(currentShop);
+                    orderModifier.setDateCreate(orderCreateDate);
+
+                    totalOrderPrice = totalOrderPrice.add(modifierOrderPrice);
+                    totalOrderProteins += modifierProteins;
+                    totalOrderFats += modifierFats;
+                    totalOrderCarbohydrates += modifierCarbohydrates;
+                    totalOrderKiloCalories += modifierKiloCalories;
+                    totalOrderWeight += modifierWeight;
+                }
+            }
+        }
+
+        order.setFullPrice(totalOrderPrice);
+
+        if (currentShop.isBonusSystem()) {
+            var customerPayByBonus = order.getPaidByBonus();
+            var maximumBonusPay = order.getFullPrice()
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                    .multiply(currentShop.getBonusPayAmount());
+
+            if (customerPayByBonus.compareTo(maximumBonusPay) > 0) {
+                throw new BadRequestException(OUT_OFF_BONUS_LIMIT);
+            }
+
+            var customerBonusAccountAmount = customer.getBonusAccount().getBonusAmount();
+
+            if (customerPayByBonus.compareTo(customerBonusAccountAmount) > 0) {
+                throw new BadRequestException(NOT_ENOUGH_BONUSES);
+            }
+
+            order.setPaidByBonus(customerPayByBonus);
+            order.setPrice(totalOrderPrice.subtract(customerPayByBonus));
+        } else {
+            order.setPrice(totalOrderPrice);
+        }
+
+        order.setProteins(totalOrderProteins);
+        order.setFats(totalOrderFats);
+        order.setCarbohydrates(totalOrderCarbohydrates);
+        order.setKiloCalories(totalOrderKiloCalories);
+        order.setWeight(totalOrderWeight);
+
+        order.setDateCreate(orderCreateDate);
+        order.setCreator(customer);
+        order.setShop(currentShop);
+        order.setStatus(OrderStatus.FORMED);
+
+        if (order.getType() == DELIVERY && order.getDeliveryAreaId() != null) {
+            var deliveryArea = deliveryAreaRepository.getOne(order.getDeliveryAreaId());
+
+            if (totalOrderPrice.compareTo(deliveryArea.getMinimumOrderAmount()) < 0) {
+                throw new BadRequestException(LOW_ORDER_PRICE);
+            }
+        }
+
+        if (orderRepository.findFirstByShopOrderByDateCreateDesc(currentShop) != null) {
+            order.setOrderNumber(orderRepository.findFirstByShopOrderByDateCreateDesc(currentShop).getOrderNumber() + 1);
+        } else {
+            order.setOrderNumber(DEFAULT_ORDER_NUMBER);
+        }
+
+        if (order.getPayType() != null) {
+            order.setPayType(order.getPayType());
+            order.setPaid(true);
+
+            if (orderRepository.findByCreatorIdAndUserOrderTypeAndPaidIsTrue(customer.getId(), UserOrderType.FIRST).isEmpty()) {
+                order.setUserOrderType(UserOrderType.FIRST);
+            }
+        }
+
+        orderRepository.save(order);
+
+        order.setUUID(currentShop.getPrefix().toUpperCase() + formatOrderDate(orderCreateDate) + order.getOrderNumber());
+
+        orderProducts
+                .forEach(orderProduct -> {
+                    orderProduct.setOrder(order);
+                    orderProductRepository.save(orderProduct);
+                });
+
+        var orderAccessories = order.getOrderAccessories();
+        List<OrderAccessory> currentOrderAccessories = new ArrayList<>();
+
+        if (orderAccessories != null) {
+            orderAccessories
+                    .forEach(orderAccessory -> {
+                        orderAccessory.setName(accessoryRepository.getOne(orderAccessory.getAccessoryId()).getName());
+                        orderAccessory.setOrder(order);
+                        orderAccessoryRepository.save(orderAccessory);
+                        currentOrderAccessories.add(orderAccessory);
+                    });
+        }
+
+        order.setOrderAccessories(currentOrderAccessories);
+
+        if (shopBranchRepository.findByIdAndShop(order.getShopBranchId(), currentShop).isPresent()) {
+            var shopBranch = shopBranchRepository.findByIdAndShop(order.getShopBranchId(), currentShop).get();
+            webSocketPushService.sendMessageToShop(order, NEWORDER);
+
+            var shopBranchResponse = new ShopBranchResponse(shopBranch);
+            var response = new CreatedOrderWithShopBranchResponse(shopBranchResponse, order);
+
+            return ResponseEntity.ok(response);
+        } else {
+            webSocketPushService.sendMessageToShop(order, NEWORDER);
+            var response = new CreatedOrderResponse(order);
+
+            return ResponseEntity.ok(response);
         }
     }
 
-    /**
-     * Customer gets a list of his orders.
-     *
-     * @param page       - page number
-     * @param customerId - customer's id
-     * @return list of customer's orders
-     */
     @Override
     public ResponseEntity<?> getOrdersByUser(Optional<Integer> page, Long customerId) {
         var orders = orderRepository.findAllByCreatorIdOrderByDateCreateDesc(customerId,

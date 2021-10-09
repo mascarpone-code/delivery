@@ -1,6 +1,8 @@
 package com.mascarpone.delivery.service.productphoto;
 
 import com.mascarpone.delivery.entity.productphoto.ProductPhoto;
+import com.mascarpone.delivery.exception.BadRequestException;
+import com.mascarpone.delivery.exception.InternalServerException;
 import com.mascarpone.delivery.payload.productphoto.UploadProductPhotoRequest;
 import com.mascarpone.delivery.service.GeneralService;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +20,7 @@ public interface ProductPhotoService extends GeneralService<ProductPhoto> {
 
     List<ProductPhoto> findAllByProductId(Long id);
 
-    ResponseEntity<?> uploadProductPhoto(MultipartFile[] photos, Long productId, Long shopAdminId) throws IOException;
+    ResponseEntity<?> uploadProductPhoto(MultipartFile[] photos, Long productId, Long shopAdminId);
 
     ResponseEntity<?> getProductPhotos(Long productId);
 

@@ -1,7 +1,7 @@
 package com.mascarpone.delivery.repository.user;
 
-import com.mascarpone.delivery.security.Role;
 import com.mascarpone.delivery.entity.user.User;
+import com.mascarpone.delivery.security.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

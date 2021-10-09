@@ -10,7 +10,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -31,25 +30,15 @@ public class MailSendServiceImpl implements MailSendService {
     }
 
     @Override
-    public void requestNewPassword(String shopPrefix, String shopEmail) {
-        var message = new SimpleMailMessage();
-        message.setFrom(rootAdminEmail);
-        message.setTo(rootAdminEmail);
-        message.setSubject("Запрос на сброс пароля");
-        message.setText("Префикс магазина: " + shopPrefix + ". Email магазина: " + shopEmail);
-        javaMailSender.send(message);
-    }
-
-    @Override
     public void sendNomenclatureForOrder(String supplierEmail, byte[] pdf) throws MessagingException {
         var message = javaMailSender.createMimeMessage();
 
-        var helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setFrom("no-reply@food-assist.ru");
-        helper.setTo(supplierEmail);
-        helper.setSubject("Заказ");
-        helper.setText("Информация по заказу находится в приложенном файле: Заказ.pdf");
-        helper.addAttachment("Заказ.pdf", new ByteArrayResource(pdf));
+        var messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+        messageHelper.setFrom("no-reply@food-assist.ru");
+        messageHelper.setTo(supplierEmail);
+        messageHelper.setSubject("Заказ");
+        messageHelper.setText("Информация по заказу находится в приложенном файле: Заказ.pdf");
+        messageHelper.addAttachment("Заказ.pdf", new ByteArrayResource(pdf));
 
         javaMailSender.send(message);
     }

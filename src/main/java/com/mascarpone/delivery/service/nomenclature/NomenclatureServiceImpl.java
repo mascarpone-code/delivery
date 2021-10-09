@@ -45,12 +45,6 @@ public class NomenclatureServiceImpl implements NomenclatureService {
     }
 
     @Override
-    public Page<Nomenclature> findAllWithFilterPageable(Nomenclature filter, int page, int size) {
-        var specification = Specification.where(new NomenclatureSpecification(filter));
-        return nomenclatureRepository.findAll(specification, PageRequest.of(page, size, Sort.Direction.ASC, "name"));
-    }
-
-    @Override
     public Optional<Nomenclature> findById(Long id) {
         return nomenclatureRepository.findById(id);
     }
@@ -60,49 +54,38 @@ public class NomenclatureServiceImpl implements NomenclatureService {
         return nomenclatureRepository.findByName(s);
     }
 
-    //автоматическая отправка заказа по email
     @Override
     public void getAndSendNomenclatureForOrder() {
-        var nomenclatureForOrder = nomenclatureRepository.findNomenclatureForOrder();
+        var nomenclatureList = nomenclatureRepository.findNomenclatureForOrder();
 
-        if (nomenclatureForOrder != null && !nomenclatureForOrder.isEmpty()) {
-            List<List<Nomenclature>> nomenclatureForOrderByShopBranchId =
-                    new ArrayList<>(nomenclatureForOrder.stream()
-                            .collect(Collectors.groupingBy(Nomenclature::getShopBranch)).values());//листы заказов по каждой точке
-
-            for (var list : nomenclatureForOrderByShopBranchId) {
-                List<List<Nomenclature>> nomenclatureForOrderByShopBranchIdOrderBySupplier =
-                        new ArrayList<>(list.stream().collect(Collectors.groupingBy(Nomenclature::getSupplier)).values());
-                orderBySupplierAndWriteToPdfAndSend(nomenclatureForOrderByShopBranchIdOrderBySupplier);
-            }
-        } else {
+        if (nomenclatureList == null || nomenclatureList.isEmpty()) {
             throw new BadRequestException(NOMENCLATURE_FOR_ORDER_NOT_FOUND);
         }
-    }
 
-    //ручная отправка заказа по текущей точке
-    @Override
-    public void getAndSendNomenclatureByShopBranchId(ShopBranch shopBranch) {
-        var nomenclatureForOrderByShopBranchId = nomenclatureRepository.findNomenclatureForOrderForShopBranchId(shopBranch);
+        List<List<Nomenclature>> nomenclatureForOrderByShopBranchId =
+                new ArrayList<>(nomenclatureList.stream()
+                        .collect(Collectors.groupingBy(Nomenclature::getShopBranch)).values());
 
-        if (nomenclatureForOrderByShopBranchId != null && !nomenclatureForOrderByShopBranchId.isEmpty()) {
+        for (var list : nomenclatureForOrderByShopBranchId) {
             List<List<Nomenclature>> nomenclatureForOrderByShopBranchIdOrderBySupplier =
-                    new ArrayList<>(nomenclatureForOrderByShopBranchId.stream().collect(Collectors.groupingBy(Nomenclature::getSupplier)).values());
+                    new ArrayList<>(list.stream().collect(Collectors.groupingBy(Nomenclature::getSupplier)).values());
             orderBySupplierAndWriteToPdfAndSend(nomenclatureForOrderByShopBranchIdOrderBySupplier);
-        } else {
-            throw new BadRequestException(NOMENCLATURE_FOR_ORDER_NOT_FOUND);
         }
     }
 
+    /**
+     * Sending the order to the supplier by e-mail
+     *
+     * @param lists lists of lists of nomenclatures
+     */
     private void orderBySupplierAndWriteToPdfAndSend(List<List<Nomenclature>> lists) {
-        for (var nomenclatureList : lists) {//листы заказа для каждой точки по поставщику
+        for (var nomenclatureList : lists) {
             var shopBranch = shopBranchService.getOne(nomenclatureList.get(0).getShopBranch().getId());
-            var pdf = writePdfNomenclature.nomenclatureReport(shopBranch, nomenclatureList); //запись в pdf
-
+            var pdfBytes = writePdfNomenclature.nomenclatureReport(shopBranch, nomenclatureList);
             var supplierEmail = supplierService.getOne(nomenclatureList.get(0).getSupplier().getId()).getEmail();
 
             try {
-                mailSendService.sendNomenclatureForOrder(supplierEmail, pdf); //отправка письма
+                mailSendService.sendNomenclatureForOrder(supplierEmail, pdfBytes);
             } catch (MessagingException e) {
                 e.printStackTrace();
             }

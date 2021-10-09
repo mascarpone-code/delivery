@@ -23,11 +23,5 @@ public interface NomenclatureRepository extends
     @Query(value = "SELECT n FROM Nomenclature n WHERE n.quantity<n.minBalance ORDER BY n.shopBranch, n.supplier")
     List<Nomenclature> findNomenclatureForOrder();
 
-    /**
-     * @return список номенклатуры на заказ для определенной точки, отсортированный по поставщикам
-     */
-    @Query(value = "SELECT n FROM Nomenclature n WHERE n.quantity<n.minBalance AND n.shopBranch = :shopBranch ORDER BY n.supplier")
-    List<Nomenclature> findNomenclatureForOrderForShopBranchId(@Param("shopBranch") ShopBranch shopBranch);
-
     Optional<Nomenclature> findByName(String s);
 }

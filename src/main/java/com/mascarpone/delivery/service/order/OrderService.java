@@ -37,6 +37,11 @@ public interface OrderService extends GeneralService<UserOrder> {
 
     Optional<UserOrder> findByIdAndShopId(Long id, Long shopId);
 
+    /**
+     * Getting all unpaid orders
+     *
+     * @return list of unpaid orders
+     */
     List<UserOrder> findAllByIsPaidFalse();
 
     Optional<UserOrder> findByCreatorIdAndUserOrderType(Long creatorId, UserOrderType userOrderType);
@@ -59,9 +64,29 @@ public interface OrderService extends GeneralService<UserOrder> {
 
     Long countAllByShopIdAndDateCreateBetween(Long shopId, Date dateFrom, Date dateTo);
 
+    /**
+     * Deleting the order
+     *
+     * @param order - order entity
+     */
     void delete(UserOrder order);
 
+    /**
+     * Customer creates order.
+     *
+     * @param order      - order entity
+     * @param customerId - customer's id
+     * @return created order entity
+     * @throws IOException
+     */
     ResponseEntity<?> createOrder(UserOrder order, Long customerId) throws IOException;
 
+    /**
+     * Customer gets a list of his orders.
+     *
+     * @param page       - page number
+     * @param customerId - customer's id
+     * @return list of customer's orders
+     */
     ResponseEntity<?> getOrdersByUser(Optional<Integer> page, Long customerId);
 }

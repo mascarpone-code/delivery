@@ -2,7 +2,6 @@ package com.mascarpone.delivery.service.productphoto;
 
 import com.mascarpone.delivery.entity.productphoto.ProductPhoto;
 import com.mascarpone.delivery.exception.BadRequestException;
-import com.mascarpone.delivery.exception.InternalServerException;
 import com.mascarpone.delivery.repository.product.ProductRepository;
 import com.mascarpone.delivery.repository.productphoto.ProductPhotoRepository;
 import com.mascarpone.delivery.repository.user.UserRepository;
@@ -54,31 +53,37 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
     /**
      * Shop uploads product photos.
      *
-     * @param photos      - product photos
-     * @param productId   - product id
-     * @param shopAdminId - shop admin id
+     * @param multipartFiles - product photos
+     * @param productId      - product id
+     * @param shopAdminId    - shop admin id
      * @return list of product photos
-     * @throws IOException
      */
     @Override
-    public ResponseEntity<?> uploadProductPhoto(MultipartFile[] photos, Long productId, Long shopAdminId) throws IOException {
+    public ResponseEntity<?> uploadProductPhoto(MultipartFile[] multipartFiles, Long productId, Long shopAdminId) {
         var shopAdmin = userRepository.getOne(shopAdminId);
         var product = productRepository.findByIdAndShop(productId, shopAdmin.getShop())
                 .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
 
-        for (var photo : photos) {
+        for (var multipartFile : multipartFiles) {
             var newProductPhoto = new ProductPhoto();
-            newProductPhoto.setImage(resizeImage(photo));
-            newProductPhoto.setMimeType(photo.getContentType());
+
+            try {
+                var multipartFileBytes = resizeImage(multipartFile);
+                newProductPhoto.setImage(multipartFileBytes);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            newProductPhoto.setMimeType(multipartFile.getContentType());
             newProductPhoto.setProduct(product);
             productPhotoRepository.save(newProductPhoto);
             newProductPhoto.setPath(GET_PRODUCT_PHOTO_ENDPOINT + newProductPhoto.getId());
             productPhotoRepository.save(newProductPhoto);
         }
 
-        var productPhotos = productPhotoRepository.findAllByProduct(product);
+        var productPhotoList = productPhotoRepository.findAllByProduct(product);
 
-        return ResponseEntity.ok(productPhotos);
+        return ResponseEntity.ok(productPhotoList);
     }
 
     /**
@@ -112,8 +117,8 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
             response.setContentType(productPhoto.getMimeType());
             IOUtils.copy(imageStream, response.getOutputStream());
             response.flushBuffer();
-        } catch (NullPointerException | IOException ex) {
-            throw new InternalServerException(ex.getMessage());
+        } catch (IOException ex) {
+            throw new BadRequestException(ex.getMessage());
         }
     }
 
@@ -133,15 +138,15 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
         var productPhotoShop = productPhoto.getProduct().getShop();
         var adminShop = shopAdmin.getShop();
 
-        if (productPhotoShop.equals(adminShop)) {
-            productPhotoRepository.delete(productPhoto);
-            var product = productPhoto.getProduct();
-            var productPhotos = productPhotoRepository.findAllByProduct(product);
-
-            return ResponseEntity.ok(productPhotos);
-        } else {
+        if (!productPhotoShop.equals(adminShop)) {
             throw new BadRequestException(PHOTO_NOT_FOUND);
         }
+
+        productPhotoRepository.delete(productPhoto);
+        var product = productPhoto.getProduct();
+        var productPhotoList = productPhotoRepository.findAllByProduct(product);
+
+        return ResponseEntity.ok(productPhotoList);
     }
 }
 

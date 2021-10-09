@@ -37,25 +37,13 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
     }
 
     @Override
-    public List<DeliveryArea> findAllByShopId(Long shopId) {
-        return deliveryAreaRepository.findAllByShopId(shopId);
-    }
-
-    /**
-     * Shop creates or updates delivery area.
-     *
-     * @param deliveryArea - delivery area entity
-     * @param shopAdminId  - shop admin id
-     * @return delivery area entity
-     */
-    @Override
     public ResponseEntity<?> createDeliveryArea(DeliveryArea deliveryArea, Long shopAdminId) {
-        var coordinatePoints = deliveryArea.getCoordinatePoints();
+        var coordinatePointList = deliveryArea.getCoordinatePoints();
 
         if (deliveryArea.getId() != null) {
             var requestedDeliveryArea = deliveryAreaRepository.getOne(deliveryArea.getId());
 
-            if (coordinatePoints == null) {
+            if (coordinatePointList == null) {
                 deliveryArea.setCoordinatePoints(requestedDeliveryArea.getCoordinatePoints());
             } else {
                 coordinatePointRepository.deleteAll(requestedDeliveryArea.getCoordinatePoints());
@@ -81,13 +69,13 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
             deliveryArea.setShop(requestedDeliveryArea.getShop());
             deliveryAreaRepository.save(deliveryArea);
         } else {
-            coordinatePoints.forEach(coordinatePointRepository::save);
+            coordinatePointList.forEach(coordinatePointRepository::save);
             var shopAdmin = userRepository.getOne(shopAdminId);
             var shop = shopAdmin.getShop();
             deliveryArea.setShop(shop);
             deliveryAreaRepository.save(deliveryArea);
 
-            coordinatePoints.forEach(coordinatePoint -> {
+            coordinatePointList.forEach(coordinatePoint -> {
                 coordinatePoint.setDeliveryArea(deliveryArea);
                 coordinatePointRepository.save(coordinatePoint);
             });
@@ -96,27 +84,15 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
         return ResponseEntity.ok(deliveryArea);
     }
 
-    /**
-     * Getting a list of shop's delivery areas.
-     *
-     * @param shopPrefix - shop prefix
-     * @return list of shop's delivery areas
-     */
     @Override
     public ResponseEntity<?> getDeliveryAreas(String shopPrefix) {
-        var shop = shopRepository.findByPrefix(shopPrefix)
+        var currentShop = shopRepository.findByPrefix(shopPrefix)
                 .orElseThrow(() -> new BadRequestException(SHOP_NOT_FOUND));
-        var deliveryAreas = deliveryAreaRepository.findAllByShop(shop);
+        var deliveryAreaList = deliveryAreaRepository.findAllByShop(currentShop);
 
-        return ResponseEntity.ok(deliveryAreas);
+        return ResponseEntity.ok(deliveryAreaList);
     }
 
-    /**
-     * Getting a delivery area
-     *
-     * @param id - delivery area id
-     * @return delivery area entity
-     */
     @Override
     public ResponseEntity<?> getDeliveryArea(Long id) {
         var deliveryArea = deliveryAreaRepository.findById(id)
@@ -125,13 +101,6 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
         return ResponseEntity.ok(deliveryArea);
     }
 
-    /**
-     * Deleting a delivery area
-     *
-     * @param areaId      - delivery area id
-     * @param shopAdminId - shop admin id
-     * @return
-     */
     @Override
     public GeneralAnswer<String> deleteDeliveryArea(Long areaId, Long shopAdminId) {
         var deliveryArea = deliveryAreaRepository.findById(areaId)
@@ -141,52 +110,44 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
         return new GeneralAnswer<>("OK", null, null);
     }
 
-    /**
-     * Checking whether the address belongs to the delivery area.
-     *
-     * @param shopPrefix - shop prefix
-     * @param y          - point latitude
-     * @param x          - point longitude
-     * @return delivery area dto
-     */
     @Override
     public ResponseEntity<?> checkPoint(String shopPrefix, Double y, Double x) {
         var shop = shopRepository.findByPrefix(shopPrefix)
                 .orElseThrow(() -> new BadRequestException(SHOP_NOT_FOUND));
         var pointInArea = false;
-        var areas = deliveryAreaRepository.findAllByShop(shop);
+        var deliveryAreaList = deliveryAreaRepository.findAllByShop(shop);
         DeliveryArea requestedArea = null;
 
-        for (var area : areas) {
-            var coordinatePoints = area.getCoordinatePoints();
+        for (var deliveryArea : deliveryAreaList) {
+            var coordinatePointList = deliveryArea.getCoordinatePoints();
 
             int i;
             int j;
             var result = false;
 
-            for (i = 0, j = coordinatePoints.size() - 1; i < coordinatePoints.size(); j = i++) {
-                if ((coordinatePoints.get(i).getLatitude() > y) != (coordinatePoints.get(j).getLatitude() > y) &&
-                        (x < (coordinatePoints.get(j).getLongitude() - coordinatePoints.get(i).getLongitude()) *
-                                (y - coordinatePoints.get(i).getLatitude()) / (coordinatePoints.get(j).getLatitude()
-                                - coordinatePoints.get(i).getLatitude()) + coordinatePoints.get(i).getLongitude())) {
+            for (i = 0, j = coordinatePointList.size() - 1; i < coordinatePointList.size(); j = i++) {
+                if ((coordinatePointList.get(i).getLatitude() > y) != (coordinatePointList.get(j).getLatitude() > y) &&
+                        (x < (coordinatePointList.get(j).getLongitude() - coordinatePointList.get(i).getLongitude()) *
+                                (y - coordinatePointList.get(i).getLatitude()) / (coordinatePointList.get(j).getLatitude()
+                                - coordinatePointList.get(i).getLatitude()) + coordinatePointList.get(i).getLongitude())) {
                     result = !result;
                 }
             }
 
             if (result) {
                 pointInArea = true;
-                requestedArea = area;
+                requestedArea = deliveryArea;
                 break;
             }
         }
 
-        if (pointInArea) {
-            var response = new DeliveryAreaIdNameMinAmountResponse(requestedArea);
-
-            return ResponseEntity.ok(response);
-        } else {
+        if (!pointInArea) {
             throw new BadRequestException(NO_DELIVERY_AREA);
         }
+
+        var response = new DeliveryAreaIdNameMinAmountResponse(requestedArea);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override

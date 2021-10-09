@@ -29,8 +29,4 @@ public class OrderModifierServiceImpl implements OrderModifierService {
         repository.save(object);
     }
 
-    @Override
-    public List<OrderModifier> findAllByModifierId(Long id) {
-        return repository.findAllByModifierId(id);
-    }
 }

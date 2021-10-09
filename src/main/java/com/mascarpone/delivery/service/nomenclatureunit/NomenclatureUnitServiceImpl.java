@@ -20,13 +20,6 @@ public class NomenclatureUnitServiceImpl implements NomenclatureUnitService {
     private final NomenclatureUnitRepository repository;
 
     @Override
-    public Page<NomenclatureUnit> findAllPageable(NomenclatureUnit filter, int page, int size) {
-        var specification = Specification.where(new NomenclatureUnitSpecification(filter));
-
-        return repository.findAll(specification, PageRequest.of(page, size, Sort.Direction.ASC, "name"));
-    }
-
-    @Override
     public Optional<NomenclatureUnit> getByName(String s) {
         return repository.findByName(s);
     }

@@ -96,7 +96,6 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
         var expDate = jObject.getString("ExpDate");
         var token = jObject.getString("Token");
 
-        //Добавление значений в hashMap
         hashMapPaymentRequest.put("Amount", String.valueOf(amount));
         hashMapPaymentRequest.put("CardId", String.valueOf(cardId));
         hashMapPaymentRequest.put("ErrorCode", errorCode);

@@ -8,11 +8,16 @@ import org.springframework.data.domain.Page;
 import java.util.Optional;
 
 public interface NomenclatureService extends GeneralService<Nomenclature> {
-    Page<Nomenclature> findAllWithFilterPageable(Nomenclature filter, int page, int size);
-
+    /**
+     * Automatic sending of the order to the supplier
+     */
     void getAndSendNomenclatureForOrder();
 
-    void getAndSendNomenclatureByShopBranchId(ShopBranch shopBranch);
-
+    /**
+     * Getting the nomenclature by name
+     *
+     * @param s - nomenclature name
+     * @return nomenclature entity
+     */
     Optional<Nomenclature> getByName(String s);
 }

@@ -17,7 +17,6 @@ public class OrderScheduler {
     private final OrderService orderService;
     private final NomenclatureService nomenclatureService;
 
-
     @Scheduled(cron = "0 0 5 * * ?", zone = "Europe/Moscow")
     public void checkOrders() {
         var dateNow = new Date().getTime();

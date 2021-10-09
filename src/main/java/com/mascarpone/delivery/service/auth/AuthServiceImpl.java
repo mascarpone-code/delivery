@@ -58,30 +58,18 @@ public class AuthServiceImpl implements AuthService {
     private final UserBonusAccountRepository userBonusAccountRepository;
     private final ShopBranchRepository shopBranchRepository;
 
-    /**
-     * Root admin registration
-     *
-     * @param request - login, password and secret word
-     * @return
-     */
     @Override
     public GeneralAnswer<String> registerRootAdmin(UserLoginPasswordRequest request) {
-        if (request.getSecretWord().equals(SECRET_WORD)) {
-            checkAvailableLogin(request.getLogin());
-            createNewRootAdmin(request.getLogin(), request.getPassword());
-
-            return new GeneralAnswer<>("OK", null, null);
-        } else {
+        if (!request.getSecretWord().equals(SECRET_WORD)) {
             throw new BadRequestException(NO_ACCESS);
         }
+
+        checkAvailableLogin(request.getLogin());
+        createNewRootAdmin(request.getLogin(), request.getPassword());
+
+        return new GeneralAnswer<>("OK", null, null);
     }
 
-    /**
-     * Root admin and shop authentication
-     *
-     * @param request - login and password
-     * @return authentication token
-     */
     @Override
     public ResponseEntity<?> authenticateShop(LoginRequest request) {
         var authentication = authenticationManager.authenticate(
@@ -95,13 +83,6 @@ public class AuthServiceImpl implements AuthService {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Shop registration
-     *
-     * @param request - login, shop name, shop prefix and payment bank
-     * @return shop name and shop prefix
-     * @throws MessagingException
-     */
     @Override
     public ResponseEntity<?> registerShop(SignUpRequest request) throws MessagingException {
         checkAvailableLogin(request.getLogin());
@@ -112,13 +93,6 @@ public class AuthServiceImpl implements AuthService {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Shop's request for password recovery
-     *
-     * @param email - shop e-mail
-     * @return shop name and shop prefix
-     * @throws MessagingException
-     */
     @Override
     public ResponseEntity<?> sendPasswordResetRequest(String email) throws MessagingException {
         checkUserPresent(email);
@@ -134,13 +108,6 @@ public class AuthServiceImpl implements AuthService {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * User authentication: sms code request
-     *
-     * @param phoneNumber - phone number
-     * @param shopPrefix  - shop prefix
-     * @return status: registration or authentication
-     */
     @Override
     public GeneralAnswer<String> requestSmsCode(String phoneNumber, String shopPrefix) {
         checkPhoneNumberMask(phoneNumber);
@@ -173,12 +140,6 @@ public class AuthServiceImpl implements AuthService {
         return new GeneralAnswer<>(statusRegistration, null, null);
     }
 
-    /**
-     * User authentication: sms code check
-     *
-     * @param request - user's phone number (79XXXXXXXXX), sms code and shop prefix
-     * @return authentication token and user role
-     */
     @Override
     public ResponseEntity<?> checkSmsCode(CheckSmsCodeRequest request) {
         var phoneNumber = request.getPhoneNumber();
@@ -202,13 +163,6 @@ public class AuthServiceImpl implements AuthService {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Courier registration
-     *
-     * @param request     - courier's login, password, name, phone number and passport
-     * @param shopAdminId - shop admin id
-     * @return courier entity
-     */
     @Override
     public ResponseEntity<?> registerCourier(CourierRegisterRequest request, Long shopAdminId) {
         checkAvailableLogin(request.getLogin());
@@ -217,12 +171,6 @@ public class AuthServiceImpl implements AuthService {
         return ResponseEntity.ok(new CourierFullResponse(createNewCourier(request, shopAdmin.getShop())));
     }
 
-    /**
-     * Courier authentication
-     *
-     * @param request - courier's login and password and shop prefix
-     * @return authentication token, user role and username
-     */
     @Override
     public ResponseEntity<?> authenticateCourier(CourierAndCookLoginRequest request) {
         var login = request.getLogin();
@@ -239,13 +187,6 @@ public class AuthServiceImpl implements AuthService {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Cook registration
-     *
-     * @param request     - cook's login and password and shop branch id
-     * @param shopAdminId - shop admin id
-     * @return cook entity
-     */
     @Override
     public ResponseEntity<?> registerCook(CookRegisterRequest request, Long shopAdminId) {
         checkAvailableLogin(request.getLogin());
@@ -255,12 +196,6 @@ public class AuthServiceImpl implements AuthService {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Cook authentication
-     *
-     * @param request - cook's login and password and shop prefix
-     * @return authentication token, user role and username
-     */
     @Override
     public ResponseEntity<?> authenticateCook(CourierAndCookLoginRequest request) {
         var login = request.getLogin();

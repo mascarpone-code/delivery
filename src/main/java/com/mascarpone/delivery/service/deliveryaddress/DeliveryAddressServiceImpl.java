@@ -1,7 +1,6 @@
 package com.mascarpone.delivery.service.deliveryaddress;
 
 import com.mascarpone.delivery.entity.deliveryaddress.DeliveryAddress;
-import com.mascarpone.delivery.entity.user.User;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.repository.deliveryaddress.DeliveryAddressRepository;
 import com.mascarpone.delivery.repository.user.UserRepository;
@@ -33,11 +32,6 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
     }
 
     @Override
-    public List<DeliveryAddress> findAllByUserId(Long id) {
-        return deliveryAddressRepository.findAllByUserId(id);
-    }
-
-    @Override
     public Optional<DeliveryAddress> findById(Long id) {
         return deliveryAddressRepository.findById(id);
     }
@@ -48,35 +42,23 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
     }
 
     @Override
-    public Optional<DeliveryAddress> findByIdAndUserId(Long id, Long userId) {
-        return deliveryAddressRepository.findByIdAndUserId(id, userId);
-    }
-
-    /**
-     * Creating and updating customer's delivery address.
-     *
-     * @param address    - customer's delivery address entity
-     * @param customerId - customer id
-     * @return customer's delivery address entity
-     */
-    @Override
-    public ResponseEntity<?> addDeliveryAddress(DeliveryAddress address, Long customerId) {
+    public ResponseEntity<?> addDeliveryAddress(DeliveryAddress deliveryAddress, Long customerId) {
         var currentUser = userRepository.getOne(customerId);
-        var customerAddresses = deliveryAddressRepository.findAllByUser(currentUser);
+        var deliveryAddressList = deliveryAddressRepository.findAllByUser(currentUser);
 
-        if (customerAddresses.isEmpty()) {
-            address.setCurrent(true);
+        if (deliveryAddressList.isEmpty()) {
+            deliveryAddress.setCurrent(true);
         }
 
-        if (address.getCurrent() == null) {
-            if (address.getId() == null) {
-                address.setCurrent(false);
+        if (deliveryAddress.getCurrent() == null) {
+            if (deliveryAddress.getId() == null) {
+                deliveryAddress.setCurrent(false);
             } else {
-                var requestedAddress = deliveryAddressRepository.getOne(address.getId());
-                address.setCurrent(requestedAddress.getCurrent());
+                var requestedAddress = deliveryAddressRepository.getOne(deliveryAddress.getId());
+                deliveryAddress.setCurrent(requestedAddress.getCurrent());
             }
-        } else if (address.getCurrent()) {
-            customerAddresses.forEach(customerAddress -> {
+        } else if (deliveryAddress.getCurrent()) {
+            deliveryAddressList.forEach(customerAddress -> {
                 customerAddress.setCurrent(false);
                 deliveryAddressRepository.save(customerAddress);
             });
@@ -84,24 +66,18 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
             throw new BadRequestException(NO_ACTIVE_ADDRESS);
         }
 
-        if (address.getId() != null) {
-            var requestedAddress = deliveryAddressRepository.getOne(address.getId());
-            address.setUser(requestedAddress.getUser());
+        if (deliveryAddress.getId() != null) {
+            var requestedAddress = deliveryAddressRepository.getOne(deliveryAddress.getId());
+            deliveryAddress.setUser(requestedAddress.getUser());
         } else {
-            address.setUser(currentUser);
+            deliveryAddress.setUser(currentUser);
         }
 
-        deliveryAddressRepository.save(address);
+        deliveryAddressRepository.save(deliveryAddress);
 
-        return ResponseEntity.ok(address);
+        return ResponseEntity.ok(deliveryAddress);
     }
 
-    /**
-     * Customer gets a list of his delivery addresses
-     *
-     * @param customerId - customer id
-     * @return list of customer's delivery addresses
-     */
     @Override
     public ResponseEntity<?> getDeliveryAddressesByCustomer(Long customerId) {
         var deliveryAddresses = deliveryAddressRepository.findAllByUserId(customerId);
@@ -109,43 +85,29 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
         return ResponseEntity.ok(deliveryAddresses);
     }
 
-    /**
-     * Customer gets his delivery address
-     *
-     * @param addressId  - address id
-     * @param customerId - customer id
-     * @return customer's deivery address entity
-     */
     @Override
     public ResponseEntity<?> getDeliveryAddressByCustomer(Long addressId, Long customerId) {
-        var address = deliveryAddressRepository.findByIdAndUserId(addressId, customerId)
+        var deliveryAddress = deliveryAddressRepository.findByIdAndUserId(addressId, customerId)
                 .orElseThrow(() -> new BadRequestException(ADDRESS_NOT_FOUND));
 
-        return ResponseEntity.ok(address);
+        return ResponseEntity.ok(deliveryAddress);
     }
 
-    /**
-     * Customer makes delivery address current.
-     *
-     * @param addressId  - address id
-     * @param customerId - customer id
-     * @return customer's deivery address entity
-     */
     @Override
     public ResponseEntity<?> makeAddressCurrent(Long addressId, Long customerId) {
         var currentUser = userRepository.getOne(customerId);
-        var address = deliveryAddressRepository.findByIdAndUserId(addressId, currentUser.getId())
+        var deliveryAddress = deliveryAddressRepository.findByIdAndUserId(addressId, currentUser.getId())
                 .orElseThrow(() -> new BadRequestException(ADDRESS_NOT_FOUND));
-        var addresses = deliveryAddressRepository.findAllByUserId(currentUser.getId());
+        var deliveryAddressList = deliveryAddressRepository.findAllByUserId(currentUser.getId());
 
-        addresses.forEach(a -> {
-            a.setCurrent(false);
-            deliveryAddressRepository.save(a);
+        deliveryAddressList.forEach(address -> {
+            address.setCurrent(false);
+            deliveryAddressRepository.save(address);
         });
 
-        address.setCurrent(true);
-        deliveryAddressRepository.save(address);
+        deliveryAddress.setCurrent(true);
+        deliveryAddressRepository.save(deliveryAddress);
 
-        return ResponseEntity.ok(address);
+        return ResponseEntity.ok(deliveryAddress);
     }
 }

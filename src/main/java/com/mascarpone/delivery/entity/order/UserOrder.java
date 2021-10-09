@@ -10,7 +10,7 @@ import com.mascarpone.delivery.entity.orderaccessory.OrderAccessory;
 import com.mascarpone.delivery.entity.orderproduct.OrderProduct;
 import com.mascarpone.delivery.entity.shop.Shop;
 import com.mascarpone.delivery.entity.user.User;
-import lombok.*;
+import lombok.Data;
 
 import javax.persistence.*;
 import java.math.BigDecimal;

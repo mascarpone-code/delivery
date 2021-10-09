@@ -1,7 +1,6 @@
 package com.mascarpone.delivery.service.modifier;
 
 import com.mascarpone.delivery.entity.modifier.Modifier;
-import com.mascarpone.delivery.entity.product.Product;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.payload.GeneralAnswer;
 import com.mascarpone.delivery.payload.modifier.ModifierClientResponse;
@@ -50,11 +49,6 @@ public class ModifierServiceImpl implements ModifierService {
     }
 
     @Override
-    public Page<Modifier> findAllByShopId(Long shopId, int page, int size) {
-        return modifierRepository.findAllByShopIdOrderByDateCreateDesc(shopId, PageRequest.of(page, size));
-    }
-
-    @Override
     public Page<Modifier> findAllByShopIdAndName(Modifier modifier, int page, int size) {
         var specification = Specification.where(new ModifierSpecification(modifier));
         return modifierRepository.findAll(specification, PageRequest.of(page, size, Sort.Direction.DESC, "dateCreate"));
@@ -66,24 +60,12 @@ public class ModifierServiceImpl implements ModifierService {
     }
 
     @Override
-    public Optional<Modifier> findByIdAndProduct(Long id, Product product) {
-        return modifierRepository.findByIdAndProducts(id, product);
-    }
-
-    /**
-     * Creating and updating a modifier.
-     *
-     * @param modifier    - modifier entity
-     * @param shopAdminId - shop admin id
-     * @return modifier entity
-     */
-    @Override
     public ResponseEntity<?> createOrUpdateModifier(Modifier modifier, Long shopAdminId) {
         checkUnit(modifier.getUnit().getId());
 
         if (modifier.getId() != null) {
-            var shop = getShop(shopAdminId);
-            var requestedModifier = modifierRepository.findByIdAndShop(modifier.getId(), shop)
+            var currentShop = getShop(shopAdminId);
+            var requestedModifier = modifierRepository.findByIdAndShop(modifier.getId(), currentShop)
                     .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
 
             modifier.setCreator(requestedModifier.getCreator());
@@ -101,78 +83,52 @@ public class ModifierServiceImpl implements ModifierService {
         return ResponseEntity.ok(new ModifierResponse(modifier));
     }
 
-    /**
-     * Shop gets a list of its modifiers. Searchable by name.
-     *
-     * @param page        - page number
-     * @param name        - modifier name
-     * @param shopAdminId - shop admin id
-     * @return list of modifiers
-     */
     @Override
     public ResponseEntity<?> getAllModifiersShop(Optional<Integer> page, Optional<String> name, Long shopAdminId) {
-        var modifier = new Modifier();
-        name.ifPresent(modifier::setName);
-        var shop = getShop(shopAdminId);
-        modifier.setShop(shop);
+        var modifierFilter = new Modifier();
+        name.ifPresent(modifierFilter::setName);
+        var currentShop = getShop(shopAdminId);
+        modifierFilter.setShop(currentShop);
 
         var modifiers = findAllByShopIdAndName(
-                modifier,
+                modifierFilter,
                 page.orElse(DEFAULT_PAGE),
                 FETCH_RECORD_COUNT);
 
-        return ResponseEntity.ok(
-                new ModifierListResponse(modifiers
-                        .stream()
-                        .map(ModifierResponse::new)
-                        .collect(Collectors.toList()), modifiers.getTotalElements()));
+        var response = new ModifierListResponse(modifiers.stream()
+                .map(ModifierResponse::new)
+                .collect(Collectors.toList()),
+                modifiers.getTotalElements());
+
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Shop gets a modifier.
-     *
-     * @param id          - modifier id
-     * @param shopAdminId - shop admin id
-     * @return modifier entity
-     */
     @Override
     public ResponseEntity<?> getModifierShop(Long id, Long shopAdminId) {
-        var shop = getShop(shopAdminId);
-        var modifier = modifierRepository.findByIdAndShop(id, shop)
+        var currentShop = getShop(shopAdminId);
+        var currentModifier = modifierRepository.findByIdAndShop(id, currentShop)
                 .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
+        var response = new ModifierResponse(currentModifier);
 
-        return ResponseEntity.ok(new ModifierResponse(modifier));
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Deleting a modifier.
-     *
-     * @param id          - modifier id
-     * @param shopAdminId - shop admin id
-     * @return
-     */
     @Override
     public GeneralAnswer<String> deleteModifier(Long id, Long shopAdminId) {
-        var shop = getShop(shopAdminId);
-        var modifier = modifierRepository.findByIdAndShop(id, shop)
+        var currentShop = getShop(shopAdminId);
+        var currentModifier = modifierRepository.findByIdAndShop(id, currentShop)
                 .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
-        modifierRepository.delete(modifier);
+        modifierRepository.delete(currentModifier);
 
         return new GeneralAnswer<>("OK", null, null);
     }
 
-    /**
-     * Customer gets modifiers of one product.
-     *
-     * @param productId - product id
-     * @return list of modifiers
-     */
     @Override
     public ResponseEntity<?> getProductModifiersByCustomer(Long productId) {
-        var product = productRepository.findById(productId)
+        var currentProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
-        var modifiers = product.getModifiers();
-        var response = modifiers
+        var modifierList = currentProduct.getModifiers();
+        var response = modifierList
                 .stream()
                 .map(ModifierClientResponse::new)
                 .collect(Collectors.toList());
@@ -180,12 +136,6 @@ public class ModifierServiceImpl implements ModifierService {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Customer gets a modifier
-     *
-     * @param id - modifier id
-     * @return modifier dto
-     */
     @Override
     public ResponseEntity<?> getModifierByCustomer(Long id) {
         var modifier = modifierRepository.findById(id)

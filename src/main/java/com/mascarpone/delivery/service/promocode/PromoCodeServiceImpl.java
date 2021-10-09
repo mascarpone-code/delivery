@@ -196,25 +196,25 @@ public class PromoCodeServiceImpl implements PromoCodeService {
 
         if (currentPromoCode.getValidFrom().after(nowDate) || currentPromoCode.getValidTo().before(nowDate)) {
             throw new BadRequestException(PROMOCODE_EXPIRED);
-        } else {
-            if (userPromoCodeRepository.existsByCustomerAndPromoCode(customer, currentPromoCode)) {
-                throw new BadRequestException(PROMOCODE_ALREADY_USED);
-            } else {
-                var newUserPromoCode = new UserPromoCode();
-                newUserPromoCode.setCustomer(customer);
-                newUserPromoCode.setPromoCode(currentPromoCode);
-                newUserPromoCode.setDateCreate(nowDate);
-                userPromoCodeRepository.save(newUserPromoCode);
-
-                var currentUserBonusAccount = customer.getBonusAccount();
-                var promoCodePrice = currentPromoCode.getPrice();
-                currentUserBonusAccount.setBonusAmount(currentUserBonusAccount.getBonusAmount().add(promoCodePrice));
-                userBonusAccountRepository.save(currentUserBonusAccount);
-
-                var response = new UserPromoCodeResponse(promoCodePrice, currentUserBonusAccount.getBonusAmount());
-
-                return ResponseEntity.ok(response);
-            }
         }
+
+        if (userPromoCodeRepository.existsByCustomerAndPromoCode(customer, currentPromoCode)) {
+            throw new BadRequestException(PROMOCODE_ALREADY_USED);
+        }
+
+        var newUserPromoCode = new UserPromoCode();
+        newUserPromoCode.setCustomer(customer);
+        newUserPromoCode.setPromoCode(currentPromoCode);
+        newUserPromoCode.setDateCreate(nowDate);
+        userPromoCodeRepository.save(newUserPromoCode);
+
+        var currentUserBonusAccount = customer.getBonusAccount();
+        var promoCodePrice = currentPromoCode.getPrice();
+        currentUserBonusAccount.setBonusAmount(currentUserBonusAccount.getBonusAmount().add(promoCodePrice));
+        userBonusAccountRepository.save(currentUserBonusAccount);
+
+        var response = new UserPromoCodeResponse(promoCodePrice, currentUserBonusAccount.getBonusAmount());
+
+        return ResponseEntity.ok(response);
     }
 }
