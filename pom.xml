@@ -15,7 +15,7 @@
 	<name>delivery</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -125,8 +125,7 @@
 			<artifactId>json</artifactId>
 			<version>20210307</version>
 		</dependency>
-
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>

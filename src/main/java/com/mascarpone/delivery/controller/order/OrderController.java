@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.Optional;
 
-@SuppressWarnings("ALL")
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderController {
