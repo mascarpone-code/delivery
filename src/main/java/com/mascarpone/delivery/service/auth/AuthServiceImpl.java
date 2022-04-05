@@ -2,7 +2,6 @@ package com.mascarpone.delivery.service.auth;
 
 import com.mascarpone.delivery.entity.enums.AccountType;
 import com.mascarpone.delivery.entity.enums.PaymentBank;
-import com.mascarpone.delivery.security.Role;
 import com.mascarpone.delivery.entity.shop.Shop;
 import com.mascarpone.delivery.entity.shopbranch.ShopBranch;
 import com.mascarpone.delivery.entity.user.User;
@@ -20,6 +19,7 @@ import com.mascarpone.delivery.repository.shopbranch.ShopBranchRepository;
 import com.mascarpone.delivery.repository.user.UserRepository;
 import com.mascarpone.delivery.repository.userbonusaccount.UserBonusAccountRepository;
 import com.mascarpone.delivery.repository.userrole.UserRoleRepository;
+import com.mascarpone.delivery.security.Role;
 import com.mascarpone.delivery.security.TokenProvider;
 import com.mascarpone.delivery.service.mail.MailSendService;
 import com.mascarpone.delivery.service.smssender.SmsSenderService;
@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,6 +36,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.mascarpone.delivery.exception.ExceptionConstants.*;
@@ -157,16 +157,16 @@ public class AuthServiceImpl implements AuthService {
         currentUser.setEnabled(true);
         userRepository.save(currentUser);
 
-        var token = tokenProvider.buildAuthToken(currentUser.getId(), currentDate);
+        var token = tokenProvider.buildAuthToken(currentUser.getUuid(), currentDate);
         var response = new AuthResponse(token, currentUser.getRoles());
 
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<?> registerCourier(CourierRegisterRequest request, Long shopAdminId) {
+    public ResponseEntity<?> registerCourier(CourierRegisterRequest request, UUID shopAdminUuid) {
         checkAvailableLogin(request.getLogin());
-        var shopAdmin = userRepository.getOne(shopAdminId);
+        var shopAdmin = userRepository.getOne(shopAdminUuid);
 
         return ResponseEntity.ok(new CourierFullResponse(createNewCourier(request, shopAdmin.getShop())));
     }
@@ -188,9 +188,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<?> registerCook(CookRegisterRequest request, Long shopAdminId) {
+    public ResponseEntity<?> registerCook(CookRegisterRequest request, UUID shopAdminUuid) {
         checkAvailableLogin(request.getLogin());
-        var shopAdmin = userRepository.getOne(shopAdminId);
+        var shopAdmin = userRepository.getOne(shopAdminUuid);
         var response = new CookFullResponse(createNewCook(request, shopAdmin.getShop()));
 
         return ResponseEntity.ok(response);

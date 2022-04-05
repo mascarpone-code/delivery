@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.mascarpone.delivery.exception.ExceptionConstants.*;
@@ -59,11 +60,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Optional<Product> findById(Long id) {
-        return productRepository.findById(id);
-    }
-
-    @Override
     public Optional<Product> findByIdAndShop(Long id, Shop shop) {
         return productRepository.findByIdAndShop(id, shop);
     }
@@ -89,17 +85,17 @@ public class ProductServiceImpl implements ProductService {
      * Creating and updating a product.
      *
      * @param product     - product entity
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return product entity
      */
     @Override
-    public ResponseEntity<?> createOrUpdateProduct(Product product, Long shopAdminId) {
+    public ResponseEntity<?> createOrUpdateProduct(Product product, UUID shopAdminUuid) {
         checkProductGroup(product);
         checkModifiers(product);
         checkUnit(product.getUnit().getId());
 
         if (product.getId() != null) {
-            var shop = getShop(shopAdminId);
+            var shop = getShop(shopAdminUuid);
             var requestedProduct = productRepository.findByIdAndShop(product.getId(), shop)
                     .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
 
@@ -107,7 +103,7 @@ public class ProductServiceImpl implements ProductService {
             product.setShop(requestedProduct.getShop());
             product.setPhotos(requestedProduct.getPhotos());
         } else {
-            var creator = userRepository.getOne(shopAdminId);
+            var creator = userRepository.getOne(shopAdminUuid);
             product.setDateCreate(new Date());
             product.setCreator(creator);
             product.setShop(creator.getShop());
@@ -125,13 +121,13 @@ public class ProductServiceImpl implements ProductService {
      * @param page           - page number
      * @param productName    - product name
      * @param productGroupId - product group id
-     * @param shopAdminId    - shop admin id
+     * @param shopAdminUuid    - shop admin uuid
      * @return list of products
      */
     @Override
-    public ResponseEntity<?> getAllProductsByShopAdmin(Optional<Integer> page, Optional<String> productName, Optional<Long> productGroupId, Long shopAdminId) {
+    public ResponseEntity<?> getAllProductsByShopAdmin(Optional<Integer> page, Optional<String> productName, Optional<Long> productGroupId, UUID shopAdminUuid) {
         var product = new Product();
-        var shop = getShop(shopAdminId);
+        var shop = getShop(shopAdminUuid);
         product.setShop(shop);
         productName.ifPresent(product::setName);
         productGroupId.ifPresent(groupId -> product.setProductGroup(productGroupRepository.getOne(groupId)));
@@ -156,12 +152,12 @@ public class ProductServiceImpl implements ProductService {
      * Shop gets a product.
      *
      * @param id          - product id
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return product dto
      */
     @Override
-    public ResponseEntity<?> getProductByShopAdmin(Long id, Long shopAdminId) {
-        var shop = getShop(shopAdminId);
+    public ResponseEntity<?> getProductByShopAdmin(Long id, UUID shopAdminUuid) {
+        var shop = getShop(shopAdminUuid);
         var product = productRepository.findByIdAndShop(id, shop)
                 .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
         var response = new ProductResponse(product);
@@ -173,12 +169,12 @@ public class ProductServiceImpl implements ProductService {
      * Deleting a product.
      *
      * @param id          - product id
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin id
      * @return
      */
     @Override
-    public GeneralAnswer<String> deleteProduct(Long id, Long shopAdminId) {
-        var shopId = getShop(shopAdminId);
+    public GeneralAnswer<String> deleteProduct(Long id, UUID shopAdminUuid) {
+        var shopId = getShop(shopAdminUuid);
         var product = productRepository.findByIdAndShop(id, shopId)
                 .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
         productRepository.delete(product);

@@ -7,17 +7,14 @@ import com.mascarpone.delivery.payload.GeneralAnswer;
 import com.mascarpone.delivery.service.GeneralService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface ProductService extends GeneralService<Product> {
     Page<Product> findAllByShopIdPageable(Long shopId, int page, int size);
-
-    Optional<Product> findById(Long id);
 
     Optional<Product> findByIdAndShop(Long id, Shop shop);
 
@@ -27,13 +24,13 @@ public interface ProductService extends GeneralService<Product> {
 
     Page<Product> findAllByShopIdAndNamePageable(Product product, int page, int size);
 
-    ResponseEntity<?> createOrUpdateProduct(Product product, Long shopAdminId);
+    ResponseEntity<?> createOrUpdateProduct(Product product, UUID shopAdminUuid);
 
-    ResponseEntity<?> getAllProductsByShopAdmin(Optional<Integer> page, Optional<String> productName, Optional<Long> productGroupId, Long shopAdminId);
+    ResponseEntity<?> getAllProductsByShopAdmin(Optional<Integer> page, Optional<String> productName, Optional<Long> productGroupId, UUID shopAdminUuid);
 
-    ResponseEntity<?> getProductByShopAdmin(Long id, Long shopAdminId);
+    ResponseEntity<?> getProductByShopAdmin(Long id, UUID shopAdminUuid);
 
-    GeneralAnswer<String> deleteProduct(Long id, Long shopAdminId);
+    GeneralAnswer<String> deleteProduct(Long id, UUID shopAdminUuid);
 
     ResponseEntity<?> getShopProductsByCustomer(Long shopId);
 

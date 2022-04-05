@@ -5,7 +5,10 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "nomenclature_unit")
 public class NomenclatureUnit {
     @Id

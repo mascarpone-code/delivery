@@ -1,14 +1,13 @@
 package com.mascarpone.delivery.service.userrole;
 
-import com.mascarpone.delivery.security.Role;
 import com.mascarpone.delivery.entity.userrole.UserRole;
 import com.mascarpone.delivery.repository.userrole.UserRoleRepository;
+import com.mascarpone.delivery.security.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -29,11 +28,6 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Override
     public List<UserRole> getAll() {
         return repository.findAll();
-    }
-
-    @Override
-    public Optional<UserRole> findById(Long id) {
-        return repository.findById(id);
     }
 
     @Override

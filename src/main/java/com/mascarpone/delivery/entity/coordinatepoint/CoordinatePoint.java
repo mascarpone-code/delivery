@@ -8,7 +8,10 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "coordinates")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CoordinatePoint {

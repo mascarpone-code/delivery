@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.mascarpone.delivery.exception.ExceptionConstants.ORDER_TYPE_ERROR;
 import static com.mascarpone.delivery.exception.ExceptionConstants.SHOP_NOT_FOUND;
@@ -34,11 +35,6 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public Optional<Shop> findById(Long id) {
-        return shopRepository.findById(id);
-    }
-
-    @Override
     public Optional<Shop> findByPrefix(String prefix) {
         return shopRepository.findByPrefix(prefix);
     }
@@ -47,12 +43,12 @@ public class ShopServiceImpl implements ShopService {
      * Updating a shop info
      *
      * @param request     - shop dto
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return shop entity
      */
     @Override
-    public ResponseEntity<?> updateShopInfo(UpdateShopInfoRequest request, Long shopAdminId) {
-        var shopAdmin = userRepository.getOne(shopAdminId);
+    public ResponseEntity<?> updateShopInfo(UpdateShopInfoRequest request, UUID shopAdminUuid) {
+        var shopAdmin = userRepository.getOne(shopAdminUuid);
         var currentShop = shopRepository.findByPrefix(shopAdmin.getShopPrefix())
                 .orElseThrow(() -> new BadRequestException(SHOP_NOT_FOUND));
 
@@ -84,5 +80,10 @@ public class ShopServiceImpl implements ShopService {
         shopRepository.save(currentShop);
 
         return ResponseEntity.ok(new ShopForAdminResponse(currentShop));
+    }
+
+    @Override
+    public Optional<Shop> findById(long shopId) {
+        return shopRepository.findById(shopId);
     }
 }

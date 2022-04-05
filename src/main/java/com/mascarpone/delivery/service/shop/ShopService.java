@@ -6,9 +6,12 @@ import com.mascarpone.delivery.service.GeneralService;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ShopService extends GeneralService<Shop> {
     Optional<Shop> findByPrefix(String prefix);
 
-    ResponseEntity<?> updateShopInfo(UpdateShopInfoRequest request, Long shopAdminId);
+    ResponseEntity<?> updateShopInfo(UpdateShopInfoRequest request, UUID shopAdminUuid);
+
+    Optional<Shop> findById(long shopId);
 }

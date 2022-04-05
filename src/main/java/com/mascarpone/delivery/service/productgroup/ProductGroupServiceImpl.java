@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.mascarpone.delivery.exception.ExceptionConstants.*;
@@ -58,11 +59,6 @@ public class ProductGroupServiceImpl implements ProductGroupService {
     }
 
     @Override
-    public Optional<ProductGroup> findById(Long id) {
-        return productGroupRepository.findById(id);
-    }
-
-    @Override
     public List<ProductGroup> findAllByShopIdAndActiveTrueOrderByOrdinalNumber(Long shopId) {
         return productGroupRepository.findAllByShopIdAndActiveTrueOrderByOrdinalNumber(shopId);
     }
@@ -71,20 +67,20 @@ public class ProductGroupServiceImpl implements ProductGroupService {
      * Creating and updating a product group.
      *
      * @param productGroup - product group entity
-     * @param shopAdminId  - shop admin id
+     * @param shopAdminUuid  - shop admin uuid
      * @return product group entity
      */
     @Override
-    public ResponseEntity<?> createOrUpdateProductGroup(ProductGroup productGroup, Long shopAdminId) {
+    public ResponseEntity<?> createOrUpdateProductGroup(ProductGroup productGroup, UUID shopAdminUuid) {
         if (productGroup.getId() != null) {
-            var shop = getShop(shopAdminId);
+            var shop = getShop(shopAdminUuid);
             var requestedProductGroup = productGroupRepository.findByIdAndShop(productGroup.getId(), shop)
                     .orElseThrow(() -> new BadRequestException(GROUP_NOT_FOUND));
 
             productGroup.setCreator(requestedProductGroup.getCreator());
             productGroup.setShop(requestedProductGroup.getShop());
         } else {
-            var creator = userRepository.getOne(shopAdminId);
+            var creator = userRepository.getOne(shopAdminUuid);
             productGroup.setCreator(creator);
             productGroup.setShop(creator.getShop());
         }
@@ -99,14 +95,14 @@ public class ProductGroupServiceImpl implements ProductGroupService {
      *
      * @param page        - page number
      * @param name        - product group name
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin id
      * @return list of product groups
      */
     @Override
-    public ResponseEntity<?> getAllProductGroupsByShopAdmin(Optional<Integer> page, Optional<String> name, Long shopAdminId) {
+    public ResponseEntity<?> getAllProductGroupsByShopAdmin(Optional<Integer> page, Optional<String> name, UUID shopAdminUuid) {
         var productGroup = new ProductGroup();
         name.ifPresent(productGroup::setName);
-        var shop = getShop(shopAdminId);
+        var shop = getShop(shopAdminUuid);
         productGroup.setShop(shop);
 
         var productGroups = findAllByShopIdAndName(
@@ -124,12 +120,12 @@ public class ProductGroupServiceImpl implements ProductGroupService {
     /**
      * Shop gets its product group.
      *
-     * @param id - product group id
+     * @param id - product group uuid
      * @return product group entity
      */
     @Override
-    public ResponseEntity<?> getProductGroupByShopAdmin(Long id, Long shopAdminId) {
-        var shop = getShop(shopAdminId);
+    public ResponseEntity<?> getProductGroupByShopAdmin(Long id, UUID shopAdminUuid) {
+        var shop = getShop(shopAdminUuid);
         var productGroup = productGroupRepository.findByIdAndShop(id, shop)
                 .orElseThrow(() -> new BadRequestException(GROUP_NOT_FOUND));
 
@@ -143,8 +139,8 @@ public class ProductGroupServiceImpl implements ProductGroupService {
      * @return
      */
     @Override
-    public GeneralAnswer<String> deleteProductGroup(Long id, Long shopAdminId) {
-        var shop = getShop(shopAdminId);
+    public GeneralAnswer<String> deleteProductGroup(Long id, UUID shopAdminUuid) {
+        var shop = getShop(shopAdminUuid);
         var productGroup = productGroupRepository.findByIdAndShop(id, shop)
                 .orElseThrow(() -> new BadRequestException(GROUP_NOT_FOUND));
 
@@ -178,12 +174,12 @@ public class ProductGroupServiceImpl implements ProductGroupService {
     /**
      * Checking an ordinal number
      *
-     * @param shopAdminId  - shop admin id
+     * @param shopAdminUuid  - shop admin uuid
      * @param productGroup - product group entity
      */
-    private void checkOrdinalNumber(Long shopAdminId, ProductGroup productGroup) {
+    private void checkOrdinalNumber(UUID shopAdminUuid, ProductGroup productGroup) {
         if (productGroupRepository.existsByShopIdAndOrdinalNumber(
-                userRepository.getOne(shopAdminId).getShop().getId(), productGroup.getOrdinalNumber())) {
+                userRepository.getOne(shopAdminUuid).getShop().getId(), productGroup.getOrdinalNumber())) {
             throw new BadRequestException(WRONG_ORDINAL_NUMBER);
         }
     }

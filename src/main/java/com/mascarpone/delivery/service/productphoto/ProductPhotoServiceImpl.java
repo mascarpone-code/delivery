@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 import static com.mascarpone.delivery.exception.ExceptionConstants.PHOTO_NOT_FOUND;
 import static com.mascarpone.delivery.exception.ExceptionConstants.PRODUCT_NOT_FOUND;
@@ -41,11 +41,6 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
     }
 
     @Override
-    public Optional<ProductPhoto> findById(Long id) {
-        return productPhotoRepository.findById(id);
-    }
-
-    @Override
     public List<ProductPhoto> findAllByProductId(Long id) {
         return productPhotoRepository.findAllByProductId(id);
     }
@@ -55,12 +50,12 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
      *
      * @param multipartFiles - product photos
      * @param productId      - product id
-     * @param shopAdminId    - shop admin id
+     * @param shopAdminUuid    - shop admin uuid
      * @return list of product photos
      */
     @Override
-    public ResponseEntity<?> uploadProductPhoto(MultipartFile[] multipartFiles, Long productId, Long shopAdminId) {
-        var shopAdmin = userRepository.getOne(shopAdminId);
+    public ResponseEntity<?> uploadProductPhoto(MultipartFile[] multipartFiles, Long productId, UUID shopAdminUuid) {
+        var shopAdmin = userRepository.getOne(shopAdminUuid);
         var product = productRepository.findByIdAndShop(productId, shopAdmin.getShop())
                 .orElseThrow(() -> new BadRequestException(PRODUCT_NOT_FOUND));
 
@@ -126,12 +121,12 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
      * Shop deletes photo of product.
      *
      * @param photoId     - product photo id
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return list of product photos
      */
     @Override
-    public ResponseEntity<?> deleteProductPhoto(Long photoId, Long shopAdminId) {
-        var shopAdmin = userRepository.getOne(shopAdminId);
+    public ResponseEntity<?> deleteProductPhoto(Long photoId, UUID shopAdminUuid) {
+        var shopAdmin = userRepository.getOne(shopAdminUuid);
         var productPhoto = productPhotoRepository.findById(photoId)
                 .orElseThrow(() -> new BadRequestException(PHOTO_NOT_FOUND));
 

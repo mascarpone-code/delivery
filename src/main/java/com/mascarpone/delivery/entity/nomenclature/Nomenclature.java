@@ -11,7 +11,10 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "nomenclature")
 public class Nomenclature {
     @Id

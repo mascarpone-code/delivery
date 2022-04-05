@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -20,7 +21,7 @@ public class ModifierResponse {
     private Double kiloCalories;
     private Double weight;
     private Long dateCreate;
-    private Long creatorId;
+    private UUID creatorId;
     private Double maxCount;
     private Unit unit;
 
@@ -35,7 +36,7 @@ public class ModifierResponse {
         this.kiloCalories = modifier.getKiloCalories();
         this.weight = modifier.getWeight();
         this.dateCreate = modifier.getDateCreate().getTime();
-        this.creatorId = modifier.getCreator().getId();
+        this.creatorId = modifier.getCreator().getUuid();
         maxCount = modifier.getMaxCount();
 
         if (modifier.getUnit() != null) {

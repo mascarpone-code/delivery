@@ -7,6 +7,8 @@ import com.mascarpone.delivery.service.unit.UnitService;
 import com.mascarpone.delivery.service.user.UserService;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 import static com.mascarpone.delivery.exception.ExceptionConstants.SHOP_NOT_FOUND;
 import static com.mascarpone.delivery.exception.ExceptionConstants.UNIT_NOT_FOUND;
 
@@ -36,8 +38,8 @@ public class ShopUtils {
         }
     }
 
-    public static Shop getShop(long shopAdminId) {
-        var shopAdmin = userService.getOne(shopAdminId);
+    public static Shop getShop(UUID shopAdminUuid) {
+        var shopAdmin = userService.getOne(shopAdminUuid);
         return shopAdmin.getShop();
     }
 }

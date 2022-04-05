@@ -10,7 +10,7 @@ import com.mascarpone.delivery.entity.orderaccessory.OrderAccessory;
 import com.mascarpone.delivery.entity.orderproduct.OrderProduct;
 import com.mascarpone.delivery.entity.shop.Shop;
 import com.mascarpone.delivery.entity.user.User;
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -18,7 +18,10 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "orders")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserOrder {

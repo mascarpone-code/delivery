@@ -12,16 +12,15 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface OrderService extends GeneralService<UserOrder> {
     Page<UserOrder> findAllByShopIdOrderByDateCreateDesc(Long shopId, int page, int size);
 
-    Optional<UserOrder> findById(Long id);
+    Page<UserOrder> findAllByCreatorUuidOrderByDateCreateDesc(UUID userUuid, int page, int size);
 
-    Page<UserOrder> findAllByCreatorIdOrderByDateCreateDesc(Long userId, int page, int size);
-
-    Optional<UserOrder> findByIdAndCreatorId(Long id, Long userId);
+    Optional<UserOrder> findByIdAndCreatorUuid(Long id, UUID userUuid);
 
     Long countAllByShopId(Long shopId);
 
@@ -29,11 +28,11 @@ public interface OrderService extends GeneralService<UserOrder> {
 
     Optional<UserOrder> findByUuidIos(Long uuidIos);
 
-    Page<UserOrder> findAllByCourierIdAndStatusOrderByDateCreateDesc(Long userId, OrderStatus orderStatus, int page, int size);
+    Page<UserOrder> findAllByCourierUuidAndStatusOrderByDateCreateDesc(UUID userUuid, OrderStatus orderStatus, int page, int size);
 
     Page<UserOrder> findAllByShopIdAndStatusOrderByDateCreateDesc(Long shopId, OrderStatus orderStatus, int page, int size);
 
-    Optional<UserOrder> findByIdAndCourierId(Long id, Long courierId);
+    Optional<UserOrder> findByIdAndCourierId(Long id, UUID courierUuid);
 
     Optional<UserOrder> findByIdAndShopId(Long id, Long shopId);
 
@@ -44,9 +43,9 @@ public interface OrderService extends GeneralService<UserOrder> {
      */
     List<UserOrder> findAllByIsPaidFalse();
 
-    Optional<UserOrder> findByCreatorIdAndUserOrderType(Long creatorId, UserOrderType userOrderType);
+    Optional<UserOrder> findByCreatorUuidAndUserOrderType(UUID creatorUuid, UserOrderType userOrderType);
 
-    Optional<UserOrder> findByCreatorIdAndUserOrderTypeAndPaidIsTrue(Long creatorId, UserOrderType userOrderType);
+    Optional<UserOrder> findByCreatorUuidAndUserOrderTypeAndPaidIsTrue(UUID creatorUuid, UserOrderType userOrderType);
 
     UserOrder findFirstByShopIdOrderByDateCreateDesc(Long shopId);
 
@@ -75,18 +74,18 @@ public interface OrderService extends GeneralService<UserOrder> {
      * Customer creates order.
      *
      * @param order      - order entity
-     * @param customerId - customer's id
+     * @param customerUuid - customer's id
      * @return created order entity
      * @throws IOException
      */
-    ResponseEntity<?> createOrder(UserOrder order, Long customerId) throws IOException;
+    ResponseEntity<?> createOrder(UserOrder order, UUID customerUuid) throws IOException;
 
     /**
      * Customer gets a list of his orders.
      *
      * @param page       - page number
-     * @param customerId - customer's id
+     * @param customerUuid - customer's id
      * @return list of customer's orders
      */
-    ResponseEntity<?> getOrdersByUser(Optional<Integer> page, Long customerId);
+    ResponseEntity<?> getOrdersByUser(Optional<Integer> page, UUID customerUuid);
 }

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -17,11 +16,6 @@ public class AccessoryServiceImpl implements AccessoryService {
     @Override
     public List<Accessory> getAll() {
         return repository.findAll();
-    }
-
-    @Override
-    public Optional<Accessory> findById(Long id) {
-        return repository.findById(id);
     }
 
     @Override

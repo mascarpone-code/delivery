@@ -18,10 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.mascarpone.delivery.exception.ExceptionConstants.*;
@@ -39,11 +36,6 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     @Override
     public List<PromoCode> getAll() {
         return promoCodeRepository.findAll();
-    }
-
-    @Override
-    public Optional<PromoCode> findById(Long id) {
-        return promoCodeRepository.findById(id);
     }
 
     @Override
@@ -80,12 +72,12 @@ public class PromoCodeServiceImpl implements PromoCodeService {
      * Shop creates or updates a promocode.
      *
      * @param promoCode   - promocode entity
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return promocode dto
      */
     @Override
-    public ResponseEntity<?> createPromoCode(PromoCode promoCode, Long shopAdminId) {
-        var creator = userRepository.getOne(shopAdminId);
+    public ResponseEntity<?> createPromoCode(PromoCode promoCode, UUID shopAdminUuid) {
+        var creator = userRepository.getOne(shopAdminUuid);
         var shop = creator.getShop();
         var newPromoCode = promoCode.getPromoCode();
 
@@ -137,14 +129,14 @@ public class PromoCodeServiceImpl implements PromoCodeService {
      *
      * @param page        - page number
      * @param active      - is promocode active or not
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return list of promocodes
      */
     @Override
-    public ResponseEntity<?> getPromoCodesByShopAdmin(Optional<Integer> page, boolean active, Long shopAdminId) {
+    public ResponseEntity<?> getPromoCodesByShopAdmin(Optional<Integer> page, boolean active, UUID shopAdminUuid) {
         Page<PromoCode> promoCodes;
         var nowDate = new Date();
-        var shopAdmin = userRepository.getOne(shopAdminId);
+        var shopAdmin = userRepository.getOne(shopAdminUuid);
         long shopId = shopAdmin.getShop().getId();
 
         if (active) {
@@ -167,12 +159,12 @@ public class PromoCodeServiceImpl implements PromoCodeService {
      * Shop gets it's promocode.
      *
      * @param promoCodeId - promo code id
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return promocode dto
      */
     @Override
-    public ResponseEntity<?> getPromoCode(Long promoCodeId, Long shopAdminId) {
-        var shopAdmin = userRepository.getOne(shopAdminId);
+    public ResponseEntity<?> getPromoCode(Long promoCodeId, UUID shopAdminUuid) {
+        var shopAdmin = userRepository.getOne(shopAdminUuid);
         var promoCode = promoCodeRepository.findByIdAndShop(promoCodeId, shopAdmin.getShop())
                 .orElseThrow(() -> new BadRequestException(PROMOCODE_NOT_FOUND));
         var response = new CreatedPromoCodeResponse(promoCode);
@@ -184,12 +176,12 @@ public class PromoCodeServiceImpl implements PromoCodeService {
      * Customer applies a promocode
      *
      * @param promoCode  - promocode string
-     * @param customerId - customer's id
+     * @param customerUuid - customer's uuid
      * @return status of the customer's bonus account
      */
     @Override
-    public ResponseEntity<?> applyPromoCodeByCustomer(String promoCode, Long customerId) {
-        var customer = userRepository.getOne(customerId);
+    public ResponseEntity<?> applyPromoCodeByCustomer(String promoCode, UUID customerUuid) {
+        var customer = userRepository.getOne(customerUuid);
         var currentPromoCode = promoCodeRepository.findByPromoCode(promoCode)
                 .orElseThrow(() -> new BadRequestException(PROMOCODE_NOT_FOUND));
         var nowDate = new Date();

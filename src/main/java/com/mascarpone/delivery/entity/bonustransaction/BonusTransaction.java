@@ -11,7 +11,10 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "bonus_transactions")
 public class BonusTransaction {
     @Id

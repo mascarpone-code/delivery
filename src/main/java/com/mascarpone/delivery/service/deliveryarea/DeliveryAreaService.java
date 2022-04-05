@@ -5,17 +5,17 @@ import com.mascarpone.delivery.payload.GeneralAnswer;
 import com.mascarpone.delivery.service.GeneralService;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
+import java.util.UUID;
 
 public interface DeliveryAreaService extends GeneralService<DeliveryArea> {
     /**
      * Shop creates or updates delivery area.
      *
      * @param deliveryArea - delivery area entity
-     * @param shopAdminId  - shop admin id
+     * @param shopAdminUuid  - shop admin uuid
      * @return delivery area entity
      */
-    ResponseEntity<?> createDeliveryArea(DeliveryArea deliveryArea, Long shopAdminId);
+    ResponseEntity<?> createDeliveryArea(DeliveryArea deliveryArea, UUID shopAdminUuid);
 
     /**
      * Getting a list of shop's delivery areas.
@@ -37,10 +37,10 @@ public interface DeliveryAreaService extends GeneralService<DeliveryArea> {
      * Deleting a delivery area
      *
      * @param areaId      - delivery area id
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return
      */
-    GeneralAnswer<String> deleteDeliveryArea(Long areaId, Long shopAdminId);
+    GeneralAnswer<String> deleteDeliveryArea(Long areaId, UUID shopAdminUuid);
 
     /**
      * Checking whether the address belongs to the delivery area.

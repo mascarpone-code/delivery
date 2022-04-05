@@ -11,7 +11,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "delivery_area")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DeliveryArea {

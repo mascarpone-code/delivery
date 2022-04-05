@@ -70,18 +70,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Optional<UserOrder> findById(Long id) {
-        return orderRepository.findById(id);
+    public Page<UserOrder> findAllByCreatorUuidOrderByDateCreateDesc(UUID userUuid, int page, int size) {
+        return orderRepository.findAllByCreatorUuidOrderByDateCreateDesc(userUuid, PageRequest.of(page, size));
     }
 
     @Override
-    public Page<UserOrder> findAllByCreatorIdOrderByDateCreateDesc(Long userId, int page, int size) {
-        return orderRepository.findAllByCreatorIdOrderByDateCreateDesc(userId, PageRequest.of(page, size));
-    }
-
-    @Override
-    public Optional<UserOrder> findByIdAndCreatorId(Long id, Long userId) {
-        return orderRepository.findByIdAndCreatorId(id, userId);
+    public Optional<UserOrder> findByIdAndCreatorUuid(Long id, UUID userUuid) {
+        return orderRepository.findByIdAndCreatorUuid(id, userUuid);
     }
 
     @Override
@@ -100,8 +95,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<UserOrder> findAllByCourierIdAndStatusOrderByDateCreateDesc(Long userId, OrderStatus orderStatus, int page, int size) {
-        return orderRepository.findAllByCourierIdAndStatusOrderByDateCreateDesc(userId, orderStatus, PageRequest.of(page, size));
+    public Page<UserOrder> findAllByCourierUuidAndStatusOrderByDateCreateDesc(UUID userUuid, OrderStatus orderStatus, int page, int size) {
+        return orderRepository.findAllByCourierUuidAndStatusOrderByDateCreateDesc(userUuid, orderStatus, PageRequest.of(page, size));
     }
 
     @Override
@@ -110,8 +105,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Optional<UserOrder> findByIdAndCourierId(Long id, Long courierId) {
-        return orderRepository.findByIdAndCourierId(id, courierId);
+    public Optional<UserOrder> findByIdAndCourierId(Long id, UUID courierUuid) {
+        return orderRepository.findByIdAndCourierUuid(id, courierUuid);
     }
 
     @Override
@@ -125,13 +120,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Optional<UserOrder> findByCreatorIdAndUserOrderType(Long creatorId, UserOrderType userOrderType) {
-        return orderRepository.findByCreatorIdAndUserOrderType(creatorId, userOrderType);
+    public Optional<UserOrder> findByCreatorUuidAndUserOrderType(UUID creatorUuid, UserOrderType userOrderType) {
+        return orderRepository.findByCreatorUuidAndUserOrderType(creatorUuid, userOrderType);
     }
 
     @Override
-    public Optional<UserOrder> findByCreatorIdAndUserOrderTypeAndPaidIsTrue(Long creatorId, UserOrderType userOrderType) {
-        return orderRepository.findByCreatorIdAndUserOrderTypeAndPaidIsTrue(creatorId, userOrderType);
+    public Optional<UserOrder> findByCreatorUuidAndUserOrderTypeAndPaidIsTrue(UUID creatorUuid, UserOrderType userOrderType) {
+        return orderRepository.findByCreatorUuidAndUserOrderTypeAndPaidIsTrue(creatorUuid, userOrderType);
     }
 
     @Override
@@ -180,8 +175,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public ResponseEntity<?> createOrder(UserOrder order, Long customerId) throws IOException {
-        var customer = userRepository.getOne(customerId);
+    public ResponseEntity<?> createOrder(UserOrder order, UUID customerUuid) throws IOException {
+        var customer = userRepository.getOne(customerUuid);
         var currentShop = customer.getShop();
         var orderProducts = order.getOrderProducts();
         var orderCreateDate = new Date();
@@ -365,7 +360,7 @@ public class OrderServiceImpl implements OrderService {
             order.setPayType(order.getPayType());
             order.setPaid(true);
 
-            if (orderRepository.findByCreatorIdAndUserOrderTypeAndPaidIsTrue(customer.getId(), UserOrderType.FIRST).isEmpty()) {
+            if (orderRepository.findByCreatorUuidAndUserOrderTypeAndPaidIsTrue(customer.getUuid(), UserOrderType.FIRST).isEmpty()) {
                 order.setUserOrderType(UserOrderType.FIRST);
             }
         }
@@ -412,8 +407,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public ResponseEntity<?> getOrdersByUser(Optional<Integer> page, Long customerId) {
-        var orders = orderRepository.findAllByCreatorIdOrderByDateCreateDesc(customerId,
+    public ResponseEntity<?> getOrdersByUser(Optional<Integer> page, UUID customerUuid) {
+        var orders = orderRepository.findAllByCreatorUuidOrderByDateCreateDesc(customerUuid,
                 PageRequest.of(page.orElse(DEFAULT_PAGE), FETCH_RECORD_COUNT));
 
         List<UserOrderResponse> userOrderResponses = new ArrayList<>();

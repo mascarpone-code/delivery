@@ -8,34 +8,35 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class SocketSessionPool {
     private static final String ACCOUNT_NOT_AUTHORIZE = "Пройдите процедуру авторизации";
     private final Map<WebSocketSession, User> sessions = new ConcurrentHashMap<>();
-    private final Map<Long, Boolean> userOnline = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> userOnline = new ConcurrentHashMap<>();
 
     public void openSession(WebSocketSession session, User account) {
         sessions.put(session, account);
-        userOnline.put(account.getId(), true);
+        userOnline.put(account.getUuid(), true);
     }
 
     public void closeSession(WebSocketSession session, CloseStatus closeStatus) {
         var isOnline = false;
 
         try {
-            var accountId = getSessionAccount((session)).getId();
+            var accountId = getSessionAccount((session)).getUuid();
 
             for (var entry : sessions.entrySet()) {
-                if (accountId.equals(entry.getValue().getId())) {
+                if (accountId.equals(entry.getValue().getUuid())) {
                     if (entry.getKey().isOpen()) {
                         isOnline = true;
                     }
                 }
             }
         } catch (NullPointerException ignored) {} finally {
-            userOnline.put(getSessionAccount((session)).getId(), isOnline);
+            userOnline.put(getSessionAccount((session)).getUuid(), isOnline);
             sessions.remove(session);
         }
 
@@ -52,7 +53,7 @@ public class SocketSessionPool {
         return sessions;
     }
 
-    public Map<Long, Boolean> getUserOnline() {
+    public Map<UUID, Boolean> getUserOnline() {
         return userOnline;
     }
 

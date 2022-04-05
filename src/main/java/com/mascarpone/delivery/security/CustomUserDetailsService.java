@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserService userService;
@@ -31,9 +33,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Transactional
-    public UserDetails loadUserById(Long id) {
-        var user = userService.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id : " + id));
+    public UserDetails loadUserById(UUID uuid) {
+        var user = userService.findByUuid(uuid)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with uuid : " + uuid));
         var userRoles = userRoleService.findAllByUser_Login(user.getLogin());
 
         return UserPrincipal.create(user, userRoles);

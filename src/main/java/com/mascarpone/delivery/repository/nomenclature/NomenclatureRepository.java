@@ -1,11 +1,9 @@
 package com.mascarpone.delivery.repository.nomenclature;
 
 import com.mascarpone.delivery.entity.nomenclature.Nomenclature;
-import com.mascarpone.delivery.entity.shopbranch.ShopBranch;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.query.QueryByExampleExecutor;
 import org.springframework.stereotype.Repository;
 

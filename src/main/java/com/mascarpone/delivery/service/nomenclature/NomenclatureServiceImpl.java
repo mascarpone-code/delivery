@@ -1,20 +1,14 @@
 package com.mascarpone.delivery.service.nomenclature;
 
 import com.mascarpone.delivery.entity.nomenclature.Nomenclature;
-import com.mascarpone.delivery.entity.shopbranch.ShopBranch;
 import com.mascarpone.delivery.exception.BadRequestException;
 import com.mascarpone.delivery.repository.nomenclature.NomenclatureRepository;
-import com.mascarpone.delivery.repository.nomenclature.specification.NomenclatureSpecification;
 import com.mascarpone.delivery.service.mail.MailSendService;
 import com.mascarpone.delivery.service.shopbranch.ShopBranchService;
 import com.mascarpone.delivery.service.supplier.SupplierService;
 import com.mascarpone.delivery.writeandread.WritePdfNomenclature;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;

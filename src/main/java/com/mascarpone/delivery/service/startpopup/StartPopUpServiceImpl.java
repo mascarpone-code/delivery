@@ -25,11 +25,6 @@ public class StartPopUpServiceImpl implements StartPopUpService {
     }
 
     @Override
-    public Optional<StartPopUp> findById(Long id) {
-        return repository.findById(id);
-    }
-
-    @Override
     public Optional<StartPopUp> findByShopId(Long shopId) {
         return repository.findByShopId(shopId);
     }

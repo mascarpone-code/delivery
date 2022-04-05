@@ -14,14 +14,15 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface OrderRepository extends JpaRepository<UserOrder, Long> {
     Page<UserOrder> findAllByShopIdOrderByDateCreateDesc(Long shopId, Pageable pageable);
 
-    Page<UserOrder> findAllByCreatorIdOrderByDateCreateDesc(Long userId, Pageable pageable);
+    Page<UserOrder> findAllByCreatorUuidOrderByDateCreateDesc(UUID userUuid, Pageable pageable);
 
-    Optional<UserOrder> findByIdAndCreatorId(Long id, Long userId);
+    Optional<UserOrder> findByIdAndCreatorUuid(Long id, UUID userUuid);
 
     Long countAllByShopId(Long shopId);
 
@@ -29,19 +30,19 @@ public interface OrderRepository extends JpaRepository<UserOrder, Long> {
 
     Optional<UserOrder> findByUUIDIos(Long uuidIos);
 
-    Page<UserOrder> findAllByCourierIdAndStatusOrderByDateCreateDesc(Long userId, OrderStatus orderStatus, Pageable pageable);
+    Page<UserOrder> findAllByCourierUuidAndStatusOrderByDateCreateDesc(UUID userUuid, OrderStatus orderStatus, Pageable pageable);
 
     Page<UserOrder> findAllByShopIdAndStatusOrderByDateCreateDesc(Long shopId, OrderStatus orderStatus, Pageable pageable);
 
-    Optional<UserOrder> findByIdAndCourierId(Long id, Long courierId);
+    Optional<UserOrder> findByIdAndCourierUuid(Long id, UUID courierUuid);
 
     Optional<UserOrder> findByIdAndShopId(Long id, Long shopId);
 
     List<UserOrder> findAllByPaidIsFalse();
 
-    Optional<UserOrder> findByCreatorIdAndUserOrderType(Long creatorId, UserOrderType userOrderType);
+    Optional<UserOrder> findByCreatorUuidAndUserOrderType(UUID creatorUuid, UserOrderType userOrderType);
 
-    Optional<UserOrder> findByCreatorIdAndUserOrderTypeAndPaidIsTrue(Long creatorId, UserOrderType userOrderTyped);
+    Optional<UserOrder> findByCreatorUuidAndUserOrderTypeAndPaidIsTrue(UUID creatorUuid, UserOrderType userOrderTyped);
 
     UserOrder findFirstByShopIdOrderByDateCreateDesc(Long shopId);
 

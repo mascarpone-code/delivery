@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface PromoCodeService extends GeneralService<PromoCode> {
@@ -21,11 +22,11 @@ public interface PromoCodeService extends GeneralService<PromoCode> {
 
     List<PromoCode> findAllByShop(Long shopId, String code);
 
-    ResponseEntity<?> createPromoCode(PromoCode promoCode, Long shopAdminId);
+    ResponseEntity<?> createPromoCode(PromoCode promoCode, UUID shopAdminUuid);
 
-    ResponseEntity<?> getPromoCodesByShopAdmin(Optional<Integer> page, boolean active, Long shopAdminId);
+    ResponseEntity<?> getPromoCodesByShopAdmin(Optional<Integer> page, boolean active, UUID shopAdminUuid);
 
-    ResponseEntity<?> getPromoCode(Long promoCodeId, Long shopAdminId);
+    ResponseEntity<?> getPromoCode(Long promoCodeId, UUID shopAdminUuid);
 
-    ResponseEntity<?> applyPromoCodeByCustomer(String promoCode, Long customerId);
+    ResponseEntity<?> applyPromoCodeByCustomer(String promoCode, UUID customerUuid);
 }

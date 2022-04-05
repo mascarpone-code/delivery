@@ -5,8 +5,10 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Data
-@Table(name = "unit")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor@Table(name = "unit")
 public class Unit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

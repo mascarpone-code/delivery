@@ -20,12 +20,12 @@ public class UnitServiceImpl implements UnitService {
     }
 
     @Override
-    public Optional<Unit> findById(Long id) {
-        return repository.findById(id);
+    public void save(Unit object) {
+        repository.save(object);
     }
 
     @Override
-    public void save(Unit object) {
-        repository.save(object);
+    public Optional<Unit> findById(long unitId) {
+        return repository.findById(unitId);
     }
 }

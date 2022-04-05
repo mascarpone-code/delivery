@@ -4,10 +4,12 @@ import com.mascarpone.delivery.entity.user.User;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class CourierFullResponse {
-    private Long courierId;
+    private UUID courierId;
     private String login;
     private String name;
     private Long dateCreate;
@@ -17,7 +19,7 @@ public class CourierFullResponse {
     private String phoneNumber;
 
     public CourierFullResponse(User courier) {
-        this.courierId = courier.getId();
+        this.courierId = courier.getUuid();
         this.login = courier.getLogin();
         this.name = courier.getName();
         this.dateCreate = courier.getDateCreate().getTime();

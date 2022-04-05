@@ -7,7 +7,10 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "prescription_card")
 public class PrescriptionCard {
     @Id

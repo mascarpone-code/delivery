@@ -9,7 +9,10 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "product_group")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ProductGroup {

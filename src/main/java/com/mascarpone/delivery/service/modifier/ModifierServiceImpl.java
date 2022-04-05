@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.mascarpone.delivery.exception.ExceptionConstants.MODIFIER_NOT_FOUND;
@@ -55,16 +56,11 @@ public class ModifierServiceImpl implements ModifierService {
     }
 
     @Override
-    public Optional<Modifier> findById(Long id) {
-        return modifierRepository.findById(id);
-    }
-
-    @Override
-    public ResponseEntity<?> createOrUpdateModifier(Modifier modifier, Long shopAdminId) {
+    public ResponseEntity<?> createOrUpdateModifier(Modifier modifier, UUID shopAdminUuid) {
         checkUnit(modifier.getUnit().getId());
 
         if (modifier.getId() != null) {
-            var currentShop = getShop(shopAdminId);
+            var currentShop = getShop(shopAdminUuid);
             var requestedModifier = modifierRepository.findByIdAndShop(modifier.getId(), currentShop)
                     .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
 
@@ -72,7 +68,7 @@ public class ModifierServiceImpl implements ModifierService {
             modifier.setDateCreate(requestedModifier.getDateCreate());
             modifier.setShop(requestedModifier.getShop());
         } else {
-            var creator = userRepository.getOne(shopAdminId);
+            var creator = userRepository.getOne(shopAdminUuid);
             modifier.setCreator(creator);
             modifier.setDateCreate(new Date());
             modifier.setShop(creator.getShop());
@@ -84,10 +80,10 @@ public class ModifierServiceImpl implements ModifierService {
     }
 
     @Override
-    public ResponseEntity<?> getAllModifiersShop(Optional<Integer> page, Optional<String> name, Long shopAdminId) {
+    public ResponseEntity<?> getAllModifiersShop(Optional<Integer> page, Optional<String> name, UUID shopAdminUuid) {
         var modifierFilter = new Modifier();
         name.ifPresent(modifierFilter::setName);
-        var currentShop = getShop(shopAdminId);
+        var currentShop = getShop(shopAdminUuid);
         modifierFilter.setShop(currentShop);
 
         var modifiers = findAllByShopIdAndName(
@@ -104,8 +100,8 @@ public class ModifierServiceImpl implements ModifierService {
     }
 
     @Override
-    public ResponseEntity<?> getModifierShop(Long id, Long shopAdminId) {
-        var currentShop = getShop(shopAdminId);
+    public ResponseEntity<?> getModifierShop(Long id, UUID shopAdminUuid) {
+        var currentShop = getShop(shopAdminUuid);
         var currentModifier = modifierRepository.findByIdAndShop(id, currentShop)
                 .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
         var response = new ModifierResponse(currentModifier);
@@ -114,8 +110,8 @@ public class ModifierServiceImpl implements ModifierService {
     }
 
     @Override
-    public GeneralAnswer<String> deleteModifier(Long id, Long shopAdminId) {
-        var currentShop = getShop(shopAdminId);
+    public GeneralAnswer<String> deleteModifier(Long id, UUID shopAdminUuid) {
+        var currentShop = getShop(shopAdminUuid);
         var currentModifier = modifierRepository.findByIdAndShop(id, currentShop)
                 .orElseThrow(() -> new BadRequestException(MODIFIER_NOT_FOUND));
         modifierRepository.delete(currentModifier);

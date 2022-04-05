@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.mascarpone.delivery.exception.ExceptionConstants.BRANCH_NOT_FOUND;
@@ -65,12 +66,12 @@ public class ShopBranchServiceImpl implements ShopBranchService {
      * Creating and updating a shop branch
      *
      * @param branch      - shop branch entity
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return shop branch entity
      */
     @Override
-    public ResponseEntity<?> createOrUpdateShopBranch(ShopBranch branch, Long shopAdminId) {
-        var shop = getShop(shopAdminId);
+    public ResponseEntity<?> createOrUpdateShopBranch(ShopBranch branch, UUID shopAdminUuid) {
+        var shop = getShop(shopAdminUuid);
         branch.setShop(shop);
         shopBranchRepository.save(branch);
 
@@ -82,13 +83,13 @@ public class ShopBranchServiceImpl implements ShopBranchService {
      *
      * @param page        - page number
      * @param name        - shop branch name
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return list of shop branches
      */
     @Override
-    public ResponseEntity<?> getShopBranchesByShopAdmin(Optional<Integer> page, Optional<String> name, Long shopAdminId) {
+    public ResponseEntity<?> getShopBranchesByShopAdmin(Optional<Integer> page, Optional<String> name, UUID shopAdminUuid) {
         var shopBranch = new ShopBranch();
-        var shop = getShop(shopAdminId);
+        var shop = getShop(shopAdminUuid);
         shopBranch.setShop(shop);
         name.ifPresent(shopBranch::setName);
 
@@ -112,12 +113,12 @@ public class ShopBranchServiceImpl implements ShopBranchService {
      * Shop gets its branch.
      *
      * @param id          - shop branch id
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return shop branch entity
      */
     @Override
-    public ResponseEntity<?> getShopBranchByShopAdmin(Long id, Long shopAdminId) {
-        var shop = getShop(shopAdminId);
+    public ResponseEntity<?> getShopBranchByShopAdmin(Long id, UUID shopAdminUuid) {
+        var shop = getShop(shopAdminUuid);
         var shopBranch = shopBranchRepository.findByIdAndShop(id, shop)
                 .orElseThrow(() -> new BadRequestException(BRANCH_NOT_FOUND));
 
@@ -153,10 +154,5 @@ public class ShopBranchServiceImpl implements ShopBranchService {
                 .orElseThrow(() -> new BadRequestException(BRANCH_NOT_FOUND));
 
         return ResponseEntity.ok(shopBranch);
-    }
-
-    @Override
-    public Optional<ShopBranch> findById(Long id) {
-        return shopBranchRepository.findById(id);
     }
 }

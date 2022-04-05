@@ -13,7 +13,10 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "modifier_order")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class OrderModifier {

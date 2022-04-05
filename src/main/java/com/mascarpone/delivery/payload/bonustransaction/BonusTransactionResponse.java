@@ -6,12 +6,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Getter
 @Setter
 public class BonusTransactionResponse {
     private Long id;
-    private Long customerId;
+    private UUID customerId;
     private String customerPhoneNumber;
     private String customerName;
     private Long orderId;
@@ -21,7 +22,7 @@ public class BonusTransactionResponse {
 
     public BonusTransactionResponse(BonusTransaction transaction) {
         id = transaction.getId();
-        customerId = transaction.getCustomer().getId();
+        customerId = transaction.getCustomer().getUuid();
         customerPhoneNumber = transaction.getCustomer().getLogin();
         customerName = transaction.getCustomer().getName();
         orderId = transaction.getOrder().getId();

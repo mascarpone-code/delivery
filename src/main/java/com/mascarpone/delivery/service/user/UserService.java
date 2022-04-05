@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface UserService extends GeneralService<User> {
@@ -20,7 +21,7 @@ public interface UserService extends GeneralService<User> {
 
     Optional<User> findByLoginAndShopPrefix(String login, String shopPrefix);
 
-    Optional<User> findByIdAndShopId(Long id, Long shopId);
+    Optional<User> findByUuidAndShopId(UUID uuid, Long shopId);
 
     Page<User> findAllByShopIdAndRoles_Role(User filter, int page, int size);
 
@@ -36,11 +37,15 @@ public interface UserService extends GeneralService<User> {
 
     Optional<User> findByLoginAndRoles_Role(String login, Role role);
 
-    User getOne(Long id);
+    User getOne(UUID uuid);
 
-    ResponseEntity<?> findUsersByPhoneNumberAndShopPrefix(String phoneNumber, Optional<Integer> page, Long shopAdminId);
+    ResponseEntity<?> findUsersByPhoneNumberAndShopPrefix(String phoneNumber, Optional<Integer> page, UUID shopAdminUuid);
 
-    ResponseEntity<?> getUserProfile(Long customerId);
+    ResponseEntity<?> getUserProfile(UUID customerUuid);
 
-    ResponseEntity<?> updateCustomerProfile(UserNameAddressRequest request, Long customerId);
+    ResponseEntity<?> updateCustomerProfile(UserNameAddressRequest request, UUID customerUuid);
+
+    Optional<User> findByUuid(UUID userUuid);
+
+//    Optional<User> findById(Long userId);
 }

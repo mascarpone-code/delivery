@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 import static com.mascarpone.delivery.exception.ExceptionConstants.*;
 
@@ -37,7 +37,7 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
     }
 
     @Override
-    public ResponseEntity<?> createDeliveryArea(DeliveryArea deliveryArea, Long shopAdminId) {
+    public ResponseEntity<?> createDeliveryArea(DeliveryArea deliveryArea, UUID shopAdminUuid) {
         var coordinatePointList = deliveryArea.getCoordinatePoints();
 
         if (deliveryArea.getId() != null) {
@@ -70,7 +70,7 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
             deliveryAreaRepository.save(deliveryArea);
         } else {
             coordinatePointList.forEach(coordinatePointRepository::save);
-            var shopAdmin = userRepository.getOne(shopAdminId);
+            var shopAdmin = userRepository.getOne(shopAdminUuid);
             var shop = shopAdmin.getShop();
             deliveryArea.setShop(shop);
             deliveryAreaRepository.save(deliveryArea);
@@ -102,7 +102,7 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
     }
 
     @Override
-    public GeneralAnswer<String> deleteDeliveryArea(Long areaId, Long shopAdminId) {
+    public GeneralAnswer<String> deleteDeliveryArea(Long areaId, UUID shopAdminUuid) {
         var deliveryArea = deliveryAreaRepository.findById(areaId)
                 .orElseThrow(() -> new BadRequestException(DELIVERY_AREA_NOT_FOUND));
         deliveryAreaRepository.delete(deliveryArea);
@@ -148,10 +148,5 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
         var response = new DeliveryAreaIdNameMinAmountResponse(requestedArea);
 
         return ResponseEntity.ok(response);
-    }
-
-    @Override
-    public Optional<DeliveryArea> findById(Long id) {
-        return deliveryAreaRepository.findById(id);
     }
 }

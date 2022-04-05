@@ -20,11 +20,6 @@ public class ShopAccessoryServiceImpl implements ShopAccessoryService {
     }
 
     @Override
-    public Optional<ShopAccessory> findById(Long id) {
-        return repository.findById(id);
-    }
-
-    @Override
     public void save(ShopAccessory object) {
         repository.save(object);
     }

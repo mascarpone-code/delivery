@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.UUID;
 
 import static com.mascarpone.delivery.utils.Constants.AUTH_TOKEN_EXPIRATION;
 import static com.mascarpone.delivery.utils.Constants.TOKEN_SECRET;
@@ -23,21 +24,21 @@ public class TokenProvider {
         return buildAuthToken(userPrincipal.getId(), new Date());
     }
 
-    public String buildAuthToken(long userId, Date currentDate) {
+    public String buildAuthToken(UUID userUUID, Date currentDate) {
         return Jwts.builder()
-                .setSubject(Long.toString(userId))
+                .setSubject(userUUID.toString())
                 .setIssuedAt(currentDate)
                 .setExpiration(new Date(currentDate.getTime() + AUTH_TOKEN_EXPIRATION))
                 .signWith(SignatureAlgorithm.HS512, TOKEN_SECRET)
                 .compact();
     }
 
-    public Long getUserIdFromToken(String token) {
+    public UUID getUserIdFromToken(String token) {
         var claims = Jwts.parser()
                 .setSigningKey(TOKEN_SECRET)
                 .parseClaimsJws(token)
                 .getBody();
-        return Long.parseLong(claims.getSubject());
+        return UUID.fromString(claims.getSubject());
     }
 
     public boolean validateToken(String authToken) {

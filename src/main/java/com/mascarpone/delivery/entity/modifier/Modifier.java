@@ -7,7 +7,7 @@ import com.mascarpone.delivery.entity.product.Product;
 import com.mascarpone.delivery.entity.shop.Shop;
 import com.mascarpone.delivery.entity.unit.Unit;
 import com.mascarpone.delivery.entity.user.User;
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -15,7 +15,10 @@ import java.util.Date;
 import java.util.Set;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "modifier")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Modifier {

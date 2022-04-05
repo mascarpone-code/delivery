@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface ProductGroupService extends GeneralService<ProductGroup> {
@@ -15,17 +16,15 @@ public interface ProductGroupService extends GeneralService<ProductGroup> {
 
     Page<ProductGroup> findAllByShopIdAndName(ProductGroup group, int page, int size);
 
-    Optional<ProductGroup> findById(Long id);
-
     List<ProductGroup> findAllByShopIdAndActiveTrueOrderByOrdinalNumber(Long shopId);
 
-    ResponseEntity<?> createOrUpdateProductGroup(ProductGroup productGroup, Long shopAdminId);
+    ResponseEntity<?> createOrUpdateProductGroup(ProductGroup productGroup, UUID shopAdminUuid);
 
-    ResponseEntity<?> getAllProductGroupsByShopAdmin(Optional<Integer> page, Optional<String> name, Long shopAdminId);
+    ResponseEntity<?> getAllProductGroupsByShopAdmin(Optional<Integer> page, Optional<String> name, UUID shopAdminUuid);
 
-    ResponseEntity<?> getProductGroupByShopAdmin(Long id, Long shopAdminId);
+    ResponseEntity<?> getProductGroupByShopAdmin(Long id, UUID shopAdminUuid);
 
-    GeneralAnswer deleteProductGroup(Long id, Long shopAdminId);
+    GeneralAnswer deleteProductGroup(Long id, UUID shopAdminUuid);
 
     ResponseEntity<?> getProductGroupsByCustomer(Long shopId);
 }

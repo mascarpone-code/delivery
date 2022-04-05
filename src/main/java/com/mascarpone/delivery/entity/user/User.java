@@ -8,7 +8,11 @@ import com.mascarpone.delivery.entity.shop.Shop;
 import com.mascarpone.delivery.entity.shopbranch.ShopBranch;
 import com.mascarpone.delivery.entity.userbonusaccount.UserBonusAccount;
 import com.mascarpone.delivery.entity.userrole.UserRole;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.*;
@@ -27,10 +31,10 @@ import java.util.*;
 )
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
-    @Column(name = "id")
-    private Long id;
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(columnDefinition = "BINARY(16)")
+    private UUID uuid;
 
     @Column(name = "login")
     private String login;
@@ -118,10 +122,4 @@ public class User {
     @JoinColumn(name = "shop_branch_id")
     @JsonIgnore
     private ShopBranch shopBranch;
-
-    // for tests
-    public User(Long id, String login) {
-        this.id = id;
-        this.login = login;
-    }
 }

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface ShopBranchService extends GeneralService<ShopBranch> {
@@ -18,11 +19,11 @@ public interface ShopBranchService extends GeneralService<ShopBranch> {
 
     ShopBranch getOne(Long id);
 
-    ResponseEntity<?> createOrUpdateShopBranch(ShopBranch branch, Long shopAdminId);
+    ResponseEntity<?> createOrUpdateShopBranch(ShopBranch branch, UUID shopAdminUuid);
 
-    ResponseEntity<?> getShopBranchesByShopAdmin(Optional<Integer> page, Optional<String> name, Long shopAdminId);
+    ResponseEntity<?> getShopBranchesByShopAdmin(Optional<Integer> page, Optional<String> name, UUID shopAdminUuid);
 
-    ResponseEntity<?> getShopBranchByShopAdmin(Long id, Long shopAdminId);
+    ResponseEntity<?> getShopBranchByShopAdmin(Long id, UUID shopAdminUuid);
 
     ResponseEntity<?> getShopBranchesByCustomer(Long shopId);
 

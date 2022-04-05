@@ -3,14 +3,16 @@ package com.mascarpone.delivery.payload.socket.auth;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class AuthSocketResponse {
     private String status;
-    private Long accountId;
+    private UUID accountUuid;
 
-    public AuthSocketResponse(String status, Long accountId) {
+    public AuthSocketResponse(String status, UUID accountUuid) {
         this.status = status;
-        this.accountId = accountId;
+        this.accountUuid = accountUuid;
     }
 }

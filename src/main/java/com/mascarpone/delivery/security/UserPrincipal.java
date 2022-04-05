@@ -9,17 +9,16 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class UserPrincipal implements UserDetails {
-    private Long id;
+    private UUID id;
     private String login;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
@@ -30,7 +29,7 @@ public class UserPrincipal implements UserDetails {
                 .collect(Collectors.toList());
 
         return new UserPrincipal(
-                user.getId(),
+                user.getUuid(),
                 user.getLogin(),
                 user.getPassword(),
                 authorities);

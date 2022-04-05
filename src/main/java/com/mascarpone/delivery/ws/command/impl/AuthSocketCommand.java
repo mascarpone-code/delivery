@@ -46,11 +46,11 @@ public class AuthSocketCommand implements GeneralSocketCommand {
             if (tokenProvider.validateToken(authSocketRequest.getAccessToken())) {
                 var userId = tokenProvider.getUserIdFromToken(authSocketRequest.getAccessToken());
 
-                if (userService.findById(userId).isPresent()) {
-                    var account = userService.findById(userId).get();
+                if (userService.findByUuid(userId).isPresent()) {
+                    var account = userService.findByUuid(userId).get();
                     socketSessionPool.openSession(session, account);
                     authSocketResponse.setStatus("OK");
-                    authSocketResponse.setAccountId(account.getId());
+                    authSocketResponse.setAccountUuid(account.getUuid());
                 } else {
                     throw new AuthSocketException("AUTHORIZATION_ERROR");
                 }

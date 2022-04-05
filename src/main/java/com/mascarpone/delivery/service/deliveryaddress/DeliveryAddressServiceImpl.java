@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.mascarpone.delivery.exception.ExceptionConstants.ADDRESS_NOT_FOUND;
 import static com.mascarpone.delivery.exception.ExceptionConstants.NO_ACTIVE_ADDRESS;
@@ -32,19 +33,14 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
     }
 
     @Override
-    public Optional<DeliveryAddress> findById(Long id) {
-        return deliveryAddressRepository.findById(id);
+    public Optional<DeliveryAddress> findByUserUuidAndCurrentIsTrue(UUID userUuid) {
+        return deliveryAddressRepository.findByUserUuidAndCurrentIsTrue(userUuid);
     }
 
     @Override
-    public Optional<DeliveryAddress> findByUserIdAndCurrentIsTrue(Long userId) {
-        return deliveryAddressRepository.findByUserIdAndCurrentIsTrue(userId);
-    }
-
-    @Override
-    public ResponseEntity<?> addDeliveryAddress(DeliveryAddress deliveryAddress, Long customerId) {
-        var currentUser = userRepository.getOne(customerId);
-        var deliveryAddressList = deliveryAddressRepository.findAllByUser(currentUser);
+    public ResponseEntity<?> addDeliveryAddress(DeliveryAddress deliveryAddress, UUID customerUuid) {
+        var currentUser = userRepository.getOne(customerUuid);
+        var deliveryAddressList = deliveryAddressRepository.findAllByUserUuid(currentUser.getUuid());
 
         if (deliveryAddressList.isEmpty()) {
             deliveryAddress.setCurrent(true);
@@ -79,26 +75,26 @@ public class DeliveryAddressServiceImpl implements DeliveryAddressService {
     }
 
     @Override
-    public ResponseEntity<?> getDeliveryAddressesByCustomer(Long customerId) {
-        var deliveryAddresses = deliveryAddressRepository.findAllByUserId(customerId);
+    public ResponseEntity<?> getDeliveryAddressesByCustomer(UUID customerUuid) {
+        var deliveryAddresses = deliveryAddressRepository.findAllByUserUuid(customerUuid);
 
         return ResponseEntity.ok(deliveryAddresses);
     }
 
     @Override
-    public ResponseEntity<?> getDeliveryAddressByCustomer(Long addressId, Long customerId) {
-        var deliveryAddress = deliveryAddressRepository.findByIdAndUserId(addressId, customerId)
+    public ResponseEntity<?> getDeliveryAddressByCustomer(Long addressId, UUID customerUuid) {
+        var deliveryAddress = deliveryAddressRepository.findByIdAndUserUuid(addressId, customerUuid)
                 .orElseThrow(() -> new BadRequestException(ADDRESS_NOT_FOUND));
 
         return ResponseEntity.ok(deliveryAddress);
     }
 
     @Override
-    public ResponseEntity<?> makeAddressCurrent(Long addressId, Long customerId) {
-        var currentUser = userRepository.getOne(customerId);
-        var deliveryAddress = deliveryAddressRepository.findByIdAndUserId(addressId, currentUser.getId())
+    public ResponseEntity<?> makeAddressCurrent(Long addressId, UUID customerUuid) {
+        var currentUser = userRepository.getOne(customerUuid);
+        var deliveryAddress = deliveryAddressRepository.findByIdAndUserUuid(addressId, currentUser.getUuid())
                 .orElseThrow(() -> new BadRequestException(ADDRESS_NOT_FOUND));
-        var deliveryAddressList = deliveryAddressRepository.findAllByUserId(currentUser.getId());
+        var deliveryAddressList = deliveryAddressRepository.findAllByUserUuid(currentUser.getUuid());
 
         deliveryAddressList.forEach(address -> {
             address.setCurrent(false);

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.mascarpone.delivery.utils.Constants.DEFAULT_PAGE;
@@ -42,11 +43,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
-    }
-
-    @Override
     public User findByLogin(String login) {
         return userRepository.findByLogin(login);
     }
@@ -66,9 +62,8 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByLoginAndShopPrefix(login, shopPrefix);
     }
 
-    @Override
-    public Optional<User> findByIdAndShopId(Long id, Long shopId) {
-        return userRepository.findByIdAndShopId(id, shopId);
+    public Optional<User> findByUuidAndShopId(UUID uuid, Long shopId) {
+        return userRepository.findByUuidAndShopId(uuid, shopId);
     }
 
     @Override
@@ -113,7 +108,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getOne(Long id) {
+    public User getOne(UUID id) {
         return userRepository.getOne(id);
     }
 
@@ -122,13 +117,13 @@ public class UserServiceImpl implements UserService {
      *
      * @param phoneNumber - phone number
      * @param page        - page number
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return list of users
      */
     @Override
-    public ResponseEntity<?> findUsersByPhoneNumberAndShopPrefix(String phoneNumber, Optional<Integer> page, Long shopAdminId) {
+    public ResponseEntity<?> findUsersByPhoneNumberAndShopPrefix(String phoneNumber, Optional<Integer> page, UUID shopAdminUuid) {
         var user = new User();
-        var shop = getShop(shopAdminId);
+        var shop = getShop(shopAdminUuid);
         user.setShopPrefix(shop.getPrefix());
         user.setPhoneNumber(phoneNumber);
         user.setAccountType(AccountType.CUSTOMER);
@@ -152,12 +147,12 @@ public class UserServiceImpl implements UserService {
     /**
      * Customer gets his profile.
      *
-     * @param customerId - customer's id
+     * @param customerUuid - customer's id
      * @return customer's profile
      */
     @Override
-    public ResponseEntity<?> getUserProfile(Long customerId) {
-        var currentUser = userRepository.getOne(customerId);
+    public ResponseEntity<?> getUserProfile(UUID customerUuid) {
+        var currentUser = userRepository.getOne(customerUuid);
 
         return ResponseEntity.ok(new UserNameAddressResponse(currentUser));
     }
@@ -166,16 +161,21 @@ public class UserServiceImpl implements UserService {
      * Customer updates his profile.
      *
      * @param request    - customer's name and address
-     * @param customerId - customer's id
+     * @param customerUuid - customer's id
      * @return customer's profile
      */
     @Override
-    public ResponseEntity<?> updateCustomerProfile(UserNameAddressRequest request, Long customerId) {
-        var currentUser = userRepository.getOne(customerId);
+    public ResponseEntity<?> updateCustomerProfile(UserNameAddressRequest request, UUID customerUuid) {
+        var currentUser = userRepository.getOne(customerUuid);
         currentUser.setName(request.getName());
         currentUser.setAddress(request.getAddress());
         userRepository.save(currentUser);
 
         return ResponseEntity.ok(new UserNameAddressResponse(currentUser));
+    }
+
+    @Override
+    public Optional<User> findByUuid(UUID userUuid) {
+        return userRepository.findById(userUuid);
     }
 }

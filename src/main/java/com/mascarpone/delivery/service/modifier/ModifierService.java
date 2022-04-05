@@ -1,14 +1,13 @@
 package com.mascarpone.delivery.service.modifier;
 
 import com.mascarpone.delivery.entity.modifier.Modifier;
-import com.mascarpone.delivery.entity.product.Product;
 import com.mascarpone.delivery.payload.GeneralAnswer;
 import com.mascarpone.delivery.service.GeneralService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface ModifierService extends GeneralService<Modifier> {
@@ -26,38 +25,38 @@ public interface ModifierService extends GeneralService<Modifier> {
      * Shop creates and updates the modifier.
      *
      * @param modifier    - modifier entity
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return modifier entity
      */
-    ResponseEntity<?> createOrUpdateModifier(Modifier modifier, Long shopAdminId);
+    ResponseEntity<?> createOrUpdateModifier(Modifier modifier, UUID shopAdminUuid);
 
     /**
      * Shop gets a list of its modifiers. Searchable by name.
      *
      * @param page        - page number
      * @param name        - modifier name
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return list of modifiers
      */
-    ResponseEntity<?> getAllModifiersShop(Optional<Integer> page, Optional<String> name, Long shopAdminId);
+    ResponseEntity<?> getAllModifiersShop(Optional<Integer> page, Optional<String> name, UUID shopAdminUuid);
 
     /**
      * Shop gets the modifier.
      *
      * @param id          - modifier id
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return modifier entity
      */
-    ResponseEntity<?> getModifierShop(Long id, Long shopAdminId);
+    ResponseEntity<?> getModifierShop(Long id, UUID shopAdminUuid);
 
     /**
      * Shop deletes the modifier.
      *
      * @param id          - modifier id
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return
      */
-    GeneralAnswer<String> deleteModifier(Long id, Long shopAdminId);
+    GeneralAnswer<String> deleteModifier(Long id, UUID shopAdminUuid);
 
     /**
      * Customer gets modifiers of the product.

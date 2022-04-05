@@ -12,7 +12,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -39,10 +38,5 @@ public class SupplierServiceImpl implements SupplierService {
     @Override
     public Supplier getOne(Long id) {
         return supplierRepository.getOne(id);
-    }
-
-    @Override
-    public Optional<Supplier> findById(Long id) {
-        return supplierRepository.findById(id);
     }
 }

@@ -13,7 +13,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -23,11 +22,6 @@ public class BonusTransactionServiceImpl implements BonusTransactionService {
     @Override
     public List<BonusTransaction> getAll() {
         return repository.findAll();
-    }
-
-    @Override
-    public Optional<BonusTransaction> findById(Long id) {
-        return repository.findById(id);
     }
 
     @Override

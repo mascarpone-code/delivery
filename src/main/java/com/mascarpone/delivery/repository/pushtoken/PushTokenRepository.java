@@ -6,14 +6,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface PushTokenRepository extends JpaRepository<PushToken, Long> {
-    boolean existsByUserIdAndToken(Long userId, String token);
+    boolean existsByUserUuidAndToken(UUID userUuid, String token);
 
-    long countAllByUserId(Long userId);
+    long countAllByUserUuid(UUID userUuid);
 
-    List<PushToken> findAllByUserIdOrderByIdAsc(Long userId, Pageable pageable);
+    List<PushToken> findAllByUserUuidOrderByIdAsc(UUID userUuid, Pageable pageable);
 
-    List<PushToken> findAllByUserId(Long userId);
+    List<PushToken> findAllByUserUuid(UUID userUuid);
 }

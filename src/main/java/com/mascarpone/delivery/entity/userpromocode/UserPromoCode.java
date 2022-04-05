@@ -8,7 +8,10 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "user_promo_code")
 public class UserPromoCode {
     @Id

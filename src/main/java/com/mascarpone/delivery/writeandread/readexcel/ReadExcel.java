@@ -6,6 +6,7 @@ import com.mascarpone.delivery.service.nomenclature.NomenclatureService;
 import com.mascarpone.delivery.service.nomenclatureunit.NomenclatureUnitService;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
+import static org.apache.poi.ss.usermodel.CellType.STRING;
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReadExcel {
@@ -91,15 +95,14 @@ public class ReadExcel {
                     data.put(count, new ArrayList<>());
 
                     for (var cell : row) {
-                        switch (cell.getCellTypeEnum()) {
-                            case NUMERIC:
-                                data.get(count).add(String.valueOf(cell.getNumericCellValue()));
-                                break;
-                            case STRING:
-                                data.get(count).add(String.valueOf(cell.getStringCellValue()));
-                                break;
-                            default:
-                                data.get(count).add(" ");
+                        CellType cellStyle = cell.getCellType();
+
+                        if (NUMERIC.equals(cellStyle)) {
+                            data.get(count).add(String.valueOf(cell.getNumericCellValue()));
+                        } else if (STRING.equals(cellStyle)) {
+                            data.get(count).add(String.valueOf(cell.getStringCellValue()));
+                        } else {
+                            data.get(count).add(" ");
                         }
                     }
 

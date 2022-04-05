@@ -6,6 +6,7 @@ import com.mascarpone.delivery.payload.user.UserLoginPasswordRequest;
 import org.springframework.http.ResponseEntity;
 
 import javax.mail.MessagingException;
+import java.util.UUID;
 
 public interface AuthService {
     /**
@@ -63,10 +64,10 @@ public interface AuthService {
      * Courier registration
      *
      * @param request     - courier's login, password, name, phone number and passport
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return courier entity
      */
-    ResponseEntity<?> registerCourier(CourierRegisterRequest request, Long shopAdminId);
+    ResponseEntity<?> registerCourier(CourierRegisterRequest request, UUID shopAdminUuid);
 
     /**
      * Courier authentication
@@ -80,10 +81,10 @@ public interface AuthService {
      * Cook registration
      *
      * @param request     - cook's login and password and shop branch id
-     * @param shopAdminId - shop admin id
+     * @param shopAdminUuid - shop admin uuid
      * @return cook entity
      */
-    ResponseEntity<?> registerCook(CookRegisterRequest request, Long shopAdminId);
+    ResponseEntity<?> registerCook(CookRegisterRequest request, UUID shopAdminUuid);
 
     /**
      * Cook authentication

@@ -60,11 +60,6 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
     }
 
     @Override
-    public Optional<PaymentTinkoff> findById(Long id) {
-        return paymentTinkoffRepository.findById(id);
-    }
-
-    @Override
     public void save(PaymentTinkoff object) {
         paymentTinkoffRepository.save(object);
     }
@@ -233,7 +228,7 @@ public class PaymentTinkoffServiceImpl implements PaymentTinkoffService {
 
         userOrder.setPaid(true);
 
-        if (orderRepository.findByCreatorIdAndUserOrderTypeAndPaidIsTrue(customer.getId(), UserOrderType.FIRST).isEmpty()) {
+        if (orderRepository.findByCreatorUuidAndUserOrderTypeAndPaidIsTrue(customer.getUuid(), UserOrderType.FIRST).isEmpty()) {
             userOrder.setUserOrderType(UserOrderType.FIRST);
         }
 

@@ -1,11 +1,14 @@
 package com.mascarpone.delivery.entity.bonustransaction;
 
 import com.mascarpone.delivery.entity.enums.BonusTransactionType;
-import lombok.Data;
+import lombok.*;
 
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class BonusTransactionFilter {
     private Long customerId;
     private Long shopId;
