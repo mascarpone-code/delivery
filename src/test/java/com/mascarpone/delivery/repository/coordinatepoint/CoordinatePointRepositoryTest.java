@@ -40,25 +40,4 @@ class CoordinatePointRepositoryTest {
         assertThat(notEmptyList.size()).isEqualTo(2);
         assertThat(emptyList.size()).isEqualTo(0);
     }
-
-    @Test
-    void it_should_not_find_all_coordinate_points_by_delivery_area_id() {
-        //given
-        DeliveryArea area = new DeliveryArea();
-        deliveryAreaRepository.save(area);
-
-        CoordinatePoint point1 = new CoordinatePoint();
-        CoordinatePoint point2 = new CoordinatePoint();
-        point1.setDeliveryArea(area);
-        point2.setDeliveryArea(area);
-        coordinatePointRepository.saveAll(Arrays.asList(point1, point2));
-
-        //when
-        List<CoordinatePoint> notEmptyList = coordinatePointRepository.findAllByDeliveryAreaId(1L);
-        List<CoordinatePoint> emptyList = coordinatePointRepository.findAllByDeliveryAreaId(2L);
-
-        //then
-        assertThat(notEmptyList.size()).isEqualTo(2);
-        assertThat(emptyList.size()).isEqualTo(0);
-    }
 }
