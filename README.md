@@ -1,5 +1,5 @@
 # Delivery
-This is a server side of product delivery application.
+This is a backend of product delivery application.
 
 It contains API for admin panel and mobile application.
 
