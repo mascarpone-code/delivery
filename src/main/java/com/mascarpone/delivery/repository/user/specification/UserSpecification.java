@@ -47,6 +47,8 @@ public class UserSpecification implements Specification<User> {
             predicates.add(cb.equal(root.get("enabled"), user.getEnabled()));
         }
 
-        return criteriaQuery.where(cb.and(predicates.toArray(new Predicate[0]))).distinct(true).getRestriction();
+        return criteriaQuery
+                .where(cb.and(predicates.toArray(new Predicate[0])))
+                .distinct(true).getRestriction();
     }
 }
