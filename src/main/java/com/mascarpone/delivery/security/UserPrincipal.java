@@ -32,7 +32,8 @@ public class UserPrincipal implements UserDetails {
                 user.getUuid(),
                 user.getLogin(),
                 user.getPassword(),
-                authorities);
+                authorities
+        );
     }
 
     @Override

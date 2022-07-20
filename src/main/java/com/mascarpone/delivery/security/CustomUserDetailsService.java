@@ -15,7 +15,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserService userService;
     private final UserRoleService userRoleService;
 
-    public CustomUserDetailsService(UserService userService, UserRoleService userRoleService) {
+    public CustomUserDetailsService(UserService userService,
+                                    UserRoleService userRoleService) {
         this.userService = userService;
         this.userRoleService = userRoleService;
     }
