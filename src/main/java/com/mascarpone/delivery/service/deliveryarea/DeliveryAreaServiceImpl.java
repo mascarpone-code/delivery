@@ -69,7 +69,7 @@ public class DeliveryAreaServiceImpl implements DeliveryAreaService {
             deliveryArea.setShop(requestedDeliveryArea.getShop());
             deliveryAreaRepository.save(deliveryArea);
         } else {
-            coordinatePointList.forEach(coordinatePointRepository::save);
+            coordinatePointRepository.saveAll(coordinatePointList);
             var shopAdmin = userRepository.getOne(shopAdminUuid);
             var shop = shopAdmin.getShop();
             deliveryArea.setShop(shop);

@@ -56,12 +56,12 @@ public class NomenclatureServiceImpl implements NomenclatureService {
             throw new BadRequestException(NOMENCLATURE_FOR_ORDER_NOT_FOUND);
         }
 
-        List<List<Nomenclature>> nomenclatureForOrderByShopBranchId =
+        var nomenclatureForOrderByShopBranchId =
                 new ArrayList<>(nomenclatureList.stream()
                         .collect(Collectors.groupingBy(Nomenclature::getShopBranch)).values());
 
         for (var list : nomenclatureForOrderByShopBranchId) {
-            List<List<Nomenclature>> nomenclatureForOrderByShopBranchIdOrderBySupplier =
+            var nomenclatureForOrderByShopBranchIdOrderBySupplier =
                     new ArrayList<>(list.stream().collect(Collectors.groupingBy(Nomenclature::getSupplier)).values());
             orderBySupplierAndWriteToPdfAndSend(nomenclatureForOrderByShopBranchIdOrderBySupplier);
         }
